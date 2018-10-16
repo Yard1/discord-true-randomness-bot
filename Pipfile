@@ -1,0 +1,24 @@
+[[source]]
+url = "https://pypi.org/simple"
+name = "pypi"
+verify_ssl = true
+
+[packages]
+discord = "*"
+async-timeout = "*"
+asteval = "*"
+asyncio = "*"
+requests = "*"
+sourcerandom = "*"
+numpy = "*"
+wordcloud = "*"
+matplotlib = "*"
+
+[dev-packages]
+pylint = "*"
+
+[requires]
+python_version = "3.6.6"
+
+[pipenv]
+allow_prereleases = true

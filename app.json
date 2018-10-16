@@ -1,0 +1,12 @@
+{
+  "name": "Discord True Randomness Bot",
+  "description": "A simple bot pulling RANDOM.ORG random numbers.",
+  "image": "",
+  "repository": "https://github.com/Yard1/discord-true-randomness-bot",
+  "keywords": ["python", "discord" ],
+  "addons": [ "heroku-postgresql" ],
+  "env": {
+  },
+  "environments": {
+  }
+}
