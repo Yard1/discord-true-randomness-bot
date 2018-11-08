@@ -185,28 +185,58 @@ async def get_roll(message):
         msg = ""
         parsed_message = await parse_message(split_message[1])
         parsed_message = await get_dices(parsed_message)
-        for item in parsed_message.split(","):
-            comparator_match = await check_comparators(item)
-            if comparator_match:
-                item = item.split(comparator_match[0])
-                item = [await get_dices(item[0]), comparator_match[0], await get_dices(item[1])]
-            if isinstance(item, list):
-                # Is a comparison - two expressions separated by a comparison operator
-                item[0] = await eval_math_expression(item[0])
-                item[2] = await eval_math_expression(item[2])
-                result = str(item[0])
-                result += ' ' + str(item[1]) + ' '
-                result += str(item[2])
-                print(result)
-            else:
-                result = (str(await eval_math_expression(item)), OPERATOR_RE.search(item))
-            if isinstance(item, list):
-                print(COMPARATORS[item[1]](item[0], item[2]))
-                msg += '\n{0.author.mention} has **%s**. (`%s`)' % ('succeeded' if COMPARATORS[item[1]](item[0], item[2]) else 'failed', result)
-            else:
-                msg += '\n{0.author.mention} %s **%s**.' % ('rolled' if DICE_RE.search(message) else 'got', round(float(result[0]), 1) if '.' in str(result[0]) else result[0])
-                if result[1]:
-                    msg += ' (`%s`)' % item
+        msg = await handle_rolls(parsed_message.split(","), message)
+    except:
+        print(traceback.format_exc())
+        msg = '.{0.author.mention} specified an invalid dice expression.'
+    return msg[1:]
+
+async def handle_rolls(rolls_list, message):
+    print(rolls_list)
+    msg = ""
+    for item in rolls_list:
+        comparator_match = await check_comparators(item)
+        if comparator_match:
+            item = item.split(comparator_match[0])
+            item = [await get_dices(item[0]), comparator_match[0], await get_dices(item[1])]
+        if isinstance(item, list):
+            # Is a comparison - two expressions separated by a comparison operator
+            item[0] = await eval_math_expression(item[0])
+            item[2] = await eval_math_expression(item[2])
+            result = str(item[0])
+            result += ' ' + str(item[1]) + ' '
+            result += str(item[2])
+            print(result)
+        else:
+            result = (str(await eval_math_expression(item)), OPERATOR_RE.search(item))
+        if isinstance(item, list):
+            print(COMPARATORS[item[1]](item[0], item[2]))
+            msg += '\n{0.author.mention} has **%s**. (`%s`)' % ('succeeded' if COMPARATORS[item[1]](item[0], item[2]) else 'failed', result)
+        else:
+            msg += '\n{0.author.mention} %s **%s**.' % ('rolled' if DICE_RE.search(message) else 'got', round(float(result[0]), 1) if '.' in str(result[0]) else result[0])
+            if result[1]:
+                msg += ' (`%s`)' % item
+    return msg
+
+async def get_repeated_roll(message):
+    if not isinstance(message, str):
+        message = message.content
+    message = message.replace("`", "")
+    try:
+        split_message = message.split(" ", 1)
+        msg = ""
+        parsed_message = await parse_message(split_message[1])
+        parsed_message = parsed_message.split(",")
+        if len(parsed_message) != 2:
+            raise ValueError("Wrong number of arguments")
+        repeat = int(parsed_message[1])
+        print(parsed_message)
+        print(repeat)
+        repeated_list = ",".join([parsed_message[0]] * repeat)
+        print(repeated_list)
+        parsed_message = await get_dices(repeated_list)
+        print(parsed_message)
+        msg = await handle_rolls(parsed_message.split(","), message)
     except:
         print(traceback.format_exc())
         msg = '.{0.author.mention} specified an invalid dice expression.'

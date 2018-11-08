@@ -1,1 +1,1 @@
-worker: python trbot_client.py
+worker: python trbot_client.py $discord_api_key

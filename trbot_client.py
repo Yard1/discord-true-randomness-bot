@@ -7,13 +7,14 @@ import asyncio
 import os
 import discord
 import shlex
+import sys
 from trbot import *
 
 QUOTE_LOCK = asyncio.Lock()
 
 # Load the unique Discord API token
-with open('discord_api_token.txt', "r") as f:
-    TOKEN = f.read().splitlines()[0]
+#with open('discord_api_token.txt', "r") as f:
+TOKEN = str(sys.argv[1])
 CLIENT = discord.Client()
 
 @CLIENT.event
@@ -39,7 +40,7 @@ async def on_message(message):
         # Commands - !help, !roll, !rand, !8ball, !quote
         if message.content == '!help' or (re.search("help", message.content, re.IGNORECASE) and CLIENT.user in message.mentions):
             print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
-            msg = 'List of commands:\n**!roll** - gives random dice rolls and calculates the resulting mathematical expression. Example: `!roll (1d100+10)/10`\n**!roll-sr** rolls Shadowrun dice in format: `number of dice`d `>` `threshold`. No math operations are supported. Example: `!roll-sr 5d > 3`\n**!rand** - returns a random number from given range (inclusive). Example: `!rand 1,10`\n**!8ball**, **!eightball** - gives a random eightball answer.\n**!quote** - gives Thought of the Day.\n**!fortune**, **!literature**, **!riddle** - works like UNIX `fortunes` command, with dicts being separate.'
+            msg = 'List of commands:\n**!roll** - gives random dice rolls and calculates the resulting mathematical expression. Example: `!roll (1d100+10)/10`\n**!roll-repeat** - first argument is a dice roll/anything that would work with !roll, second argument is how many times it should be repeated. Example: `!roll 2d20+2, 4`\n**!roll-sr** rolls Shadowrun dice in format: `number of dice`d `>` `threshold`. No math operations are supported. Example: `!roll-sr 5d > 3`\n**!rand** - returns a random number from given range (inclusive). Example: `!rand 1,10`\n**!8ball**, **!eightball** - gives a random eightball answer.\n**!quote** - gives Thought of the Day.\n**!fortune**, **!literature**, **!riddle** - works like UNIX `fortunes` command, with dicts being separate.'
         elif message.content.startswith('!roll ') or message.content == '!roll':
             print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
             if message.content.strip() == '!roll':
@@ -52,6 +53,12 @@ async def on_message(message):
                 msg = '{0.author.mention} specified an invalid Shadowrun dice expression.'
             else:
                 msg = await get_shadowrun_roll(message)
+        elif message.content.startswith('!roll-repeat ') or message.content == '!roll-repeat' or message.content.startswith('!roll-r ') or message.content == '!roll-r':
+            print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
+            if message.content.strip() == '!roll-repeat' or message.content.strip() == '!roll-r':
+                msg = '{0.author.mention} specified an invalid repeated dice expression.'
+            else:
+                msg = await get_repeated_roll(message)
         elif message.content.startswith('!rand ') or message.content == '!rand':
             print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
             if message.content.strip() == '!rand':
