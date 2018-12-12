@@ -274,7 +274,7 @@ async def get_shadowrun_roll(message):
             else:
                 has_msg = 'Failed'
 
-            msg += '\n{0.author.mention} has **%s**! (Dices: `%d`, Hits: `%d %s %d`, 1s: `%d %s %d`)\n```%s```' % (has_msg, dices, results[1], '≥' if success else '<', required_successes, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
+            msg += '\n{0.author.mention} has **%s**! (Dices: `%d`, Limit: `%d`, Hits: `%d %s %d`, 1s: `%d %s %d`)\n```%s```' % (has_msg, dices, limit, results[1], '≥' if success else '<', required_successes, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
     except:
         print(traceback.format_exc())
         msg = '.{0.author.mention} specified an invalid Shadowrun dice expression.'
