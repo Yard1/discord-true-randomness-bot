@@ -33,7 +33,7 @@ RAND_GEN = sourcerandom.SourceRandom(source=OnlineRandomnessSource.RANDOM_ORG, c
 
 # Regex
 DICE_RE = re.compile(r"[0-9]*d[0-9]*", re.IGNORECASE)
-SHADOWRUN_DICE_RE = re.compile(r"([0-9]*)d?\s*>=?\s*([0-9]*)", re.IGNORECASE)
+SHADOWRUN_DICE_RE = re.compile(r"([0-9]+)d\s*([0-9]+)l\s*>=?\s*([0-9]+)", re.IGNORECASE)
 OPERATOR_RE = re.compile(r"[\+\-\^\*\%\/]", re.IGNORECASE)
 COMPARATOR_RE = re.compile(r"(?:[<>][=]?)|(?:==)", re.IGNORECASE)
 GOOD_BOT_RE = re.compile(r"((?:\bwise)|(?:smart)|(?:cutie)|(?:cute)|(?:fun)|(?:great)|(?:\bintelligent)|(?:\bgood)|(?:nice)|(?:amazing)|(?:gud)|(?:lovely)|(?:pretty)|(?:useful)|(?:best)|(?:love you)|(?:love u)|(?:luv u)|(?:luv you))\s*((?:bot)|(?:boy)|(?:boi)|(?:botty))", re.IGNORECASE)
@@ -256,22 +256,25 @@ async def get_shadowrun_roll(message):
             if not sr_match:
                 raise ValueError('Wrong Shadowrun dice expression.')
             dices = int(sr_match.group(1))
-            required_successes = int(sr_match.group(2))
+            limit = int(sr_match.group(2))
+            required_successes = int(sr_match.group(3))
             results = await get_shadowrun_dices(dices)
+            if results > limit:
+                results = limit
             success = results[1] >= required_successes
-            glitch = results[2] > dices // 2
+            glitch = results[2] >= dices // 2
             
             if success and not glitch:
                 has_msg = 'Succeeded'
             elif glitch:
-                if success < 1:
+                if not success:
                     has_msg = 'Critically Glitched'
                 else:
                     has_msg = 'Glitched'
             else:
                 has_msg = 'Failed'
 
-            msg += '\n{0.author.mention} has **%s**! (Dices: `%d`, Hits: `%d %s %d`, 1s: `%d %s %d`)\n```%s```' % (has_msg, dices, results[1], '≥' if success else '<', required_successes, results[2], '>' if glitch else '≤', dices // 2, results[0]) 
+            msg += '\n{0.author.mention} has **%s**! (Dices: `%d`, Hits: `%d %s %d`, 1s: `%d %s %d`)\n```%s```' % (has_msg, dices, results[1], '≥' if success else '<', required_successes, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
     except:
         print(traceback.format_exc())
         msg = '.{0.author.mention} specified an invalid Shadowrun dice expression.'
