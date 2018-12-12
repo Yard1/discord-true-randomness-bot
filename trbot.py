@@ -252,16 +252,19 @@ async def get_shadowrun_roll(message):
         msg = ""
         parsed_message = await parse_message(split_message[1])
         for item in parsed_message.split(","):
+            print(item)
             sr_match = SHADOWRUN_DICE_RE.match(item.strip())
+            print(sr_match)
             if not sr_match:
                 raise ValueError('Wrong Shadowrun dice expression.')
             dices = int(sr_match.group(1))
             limit = int(sr_match.group(2))
             required_successes = int(sr_match.group(3))
             results = await get_shadowrun_dices(dices)
-            if results > limit:
-                results = limit
-            success = results[1] >= required_successes
+            hits = results[1]
+            if hits > limit:
+                hits = limit
+            success = hits >= required_successes
             glitch = results[2] >= dices // 2
             
             if success and not glitch:
@@ -274,7 +277,7 @@ async def get_shadowrun_roll(message):
             else:
                 has_msg = 'Failed'
 
-            msg += '\n{0.author.mention} has **%s**! (Dices: `%d`, Limit: `%d`, Hits: `%d %s %d`, 1s: `%d %s %d`)\n```%s```' % (has_msg, dices, limit, results[1], '≥' if success else '<', required_successes, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
+            msg += '\n{0.author.mention} has **%s**! (Dices: `%d`, Limit: `%d`, Hits: `%d %s %d`, 1s: `%d %s %d`)\n```%s```' % (has_msg, dices, limit, hits, '≥' if success else '<', required_successes, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
     except:
         print(traceback.format_exc())
         msg = '.{0.author.mention} specified an invalid Shadowrun dice expression.'
