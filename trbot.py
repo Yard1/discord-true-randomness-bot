@@ -271,14 +271,15 @@ async def get_asoiaf_roll(message):
             dices += bonus
             dices = await get_random_numbers(dices, 1, 6)
             dices.sort(reverse=True)
-            if bonus < 1:
-                discarded_dices = []
-            else:
+            discarded_dices = None
+            if bonus > 0:
                 discarded_dices = dices[-bonus:]
             dices = dices[:len(dices)-bonus]
             total = sum(dices)
-
-            msg += '\n{0.author.mention} has a total of **%s**!\n```%s```\nDiscarded:\n```%s```' % (total, dices, discarded_dices) 
+            if discarded_dices:
+                msg += '\n{0.author.mention} has a total of **%s**!\n```%s```\nDiscarded:\n```%s```' % (total, dices, discarded_dices)
+            else:
+                msg += '\n{0.author.mention} has a total of **%s**!\n```%s```' % (total, dices)
     except:
         print(traceback.format_exc())
         msg = '.{0.author.mention} specified an invalid Shadowrun dice expression.'
