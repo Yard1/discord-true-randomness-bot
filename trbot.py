@@ -41,6 +41,7 @@ GOOD_BOT_RE_MENTION = re.compile(r"(?:\bwise)|(?:smart)|(?:cutie)|(?:cute)|(?:\b
 BAD_BOT_RE = re.compile(r"((?:suicide)|(?:ghey)|(?:gay)|(?:nasty)|(?:piss)|(?:turd)|(?:poop)|(?:shit)|(?:ungood)|(?:bad)|(?:no fun)|(?:dumb)|(?:worst)|(?:terrible)|(?:horrible)|(?:stinky)|(?:mean)|(?:rude)|(?:cunt)|(?:moron)|(?:ass)|(?:fuck)|(?:fuck\s*you)|(?:fuck\s*u)|(?:kill\s*yourself)|(?:kys))\s*((?:bot)|(?:boy)|(?:boi)|(?:botty))", re.IGNORECASE)
 BAD_BOT_RE_MENTION = re.compile(r"(?:suicide)|(?:ghey)|(?:gay)|(?:nasty)|(?:piss)|(?:turd)|(?:poop)|(?:shit)|(?:ungood)|(?:bad)|(?:no fun)|(?:dumb)|(?:worst)|(?:terrible)|(?:horrible)|(?:stinky)|(?:mean)|(?:rude)|(?:cunt)|(?:moron)|(?:ass)|(?:fuck)|(?:fuck\s*you)|(?:fuck\s*u)|(?:kill\s*yourself)|(?:kys)|(?:go\s*to\s*hell)", re.IGNORECASE)
 EXPLAIN_BOT_RE = re.compile(r"(?:how)|(?:explain)|(?:explanation)|(?:why)|(?:what)|(?:tell)", re.IGNORECASE)
+HIGH_FIVE_RE = re.compile(r"(?:high five)|(?:✋)", re.IGNORECASE)
 MATH_EXPRESSION_RE = re.compile(r"^[0-9\.\+\-\/\*\^\%\(\)\s]+$")
 WORD_CLOUD_RE = re.compile(r"(\<\@[0-9]*?\>)|(\:(.*?)\:)")
 

@@ -101,6 +101,16 @@ async def on_message(message):
                     print('User %s (ID: %s, Server: %s) made a bad bot comment :( %s' % (message.author.name, message.author.id, message.server, message.content))
                     await CLIENT.add_reaction(message, random.choice(BADBOYREACTIONS))
                     return
+                if HIGH_FIVE_RE.search(message.content):
+                    print('User %s (ID: %s, Server: %s) made a high five comment :( %s' % (message.author.name, message.author.id, message.server, message.content))
+                    await CLIENT.add_reaction(message, "✋")
+                    return
+            if HIGH_FIVE_RE.search(message.content):
+                async for item in CLIENT.logs_from(message.channel, limit=5, before=message):
+                    if item.author == CLIENT.user:
+                        print('User %s (ID: %s, Server: %s) made a high five comment :( %s' % (message.author.name, message.author.id, message.server, message.content))
+                        await CLIENT.add_reaction(message, "✋")
+                        return
             if BAD_BOT_RE.search(message.content):
                 async for item in CLIENT.logs_from(message.channel, limit=5, before=message):
                     if item.author == CLIENT.user:
