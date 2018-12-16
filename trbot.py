@@ -271,7 +271,10 @@ async def get_asoiaf_roll(message):
             dices += bonus
             dices = await get_random_numbers(dices, 1, 6)
             dices.sort(reverse=True)
-            discarded_dices = dices[-bonus:]
+            if bonus < 1:
+                discarded_dices = []
+            else:
+                discarded_dices = dices[-bonus:]
             dices = dices[:len(dices)-bonus]
             total = sum(dices)
 
