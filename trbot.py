@@ -33,6 +33,8 @@ RAND_GEN = sourcerandom.SourceRandom(source=OnlineRandomnessSource.RANDOM_ORG, c
 
 # Regex
 DICE_RE = re.compile(r"[0-9]*d[0-9]*", re.IGNORECASE)
+ASOIAF_DICE_RE = re.compile(r"([0-9]+)d\s*([0-9]+)b", re.IGNORECASE)
+ASOIAF_DICE_RE_NO_BONUS = re.compile(r"([0-9]+)d", re.IGNORECASE)
 SHADOWRUN_DICE_RE = re.compile(r"([0-9]+)d\s*([0-9]+)l\s*>=?\s*([0-9]+)", re.IGNORECASE)
 SHADOWRUN_DICE_RE_NO_THRESHOLD = re.compile(r"([0-9]+)d\s*([0-9]+)l", re.IGNORECASE)
 OPERATOR_RE = re.compile(r"[\+\-\^\*\%\/]", re.IGNORECASE)
@@ -230,8 +232,9 @@ async def get_repeated_roll(message):
         parsed_message = await parse_message(split_message[1])
         parsed_message = parsed_message.split(",")
         if len(parsed_message) != 2:
-            raise ValueError("Wrong number of arguments")
-        repeat = int(parsed_message[1])
+            repeat = 1
+        else:
+            repeat = int(parsed_message[1])
         print(parsed_message)
         print(repeat)
         repeated_list = ",".join([parsed_message[0]] * repeat)
@@ -242,6 +245,40 @@ async def get_repeated_roll(message):
     except:
         print(traceback.format_exc())
         msg = '.{0.author.mention} specified an invalid dice expression.'
+    return msg[1:]
+
+async def get_asoiaf_roll(message):
+    '''Handles the !roll-asoiaf command'''
+    if not isinstance(message, str):
+        message = message.content
+    message = message.replace("`", "")
+    try:
+        split_message = message.split(" ", 1)
+        msg = ""
+        parsed_message = await parse_message(split_message[1])
+        for item in parsed_message.split(","):
+            asoiaf_match = ASOIAF_DICE_RE.match(item.strip())
+            bonus = 0
+            if not asoiaf_match:
+                asoiaf_match = ASOIAF_DICE_RE_NO_BONUS.match(item.strip())
+            if not asoiaf_match:
+                raise ValueError('Wrong ASOIAF dice expression.')
+            dices = int(asoiaf_match.group(1))
+            try:
+                bonus = int(asoiaf_match.group(2))
+            except:
+                pass
+            dices += bonus
+            dices = await get_random_numbers(dices, 1, 6)
+            dices.sort(reverse=True)
+            discarded_dices = dices[-bonus:]
+            dices = dices[:len(dices)-bonus]
+            total = sum(dices)
+
+            msg += '\n{0.author.mention} has a total of **%s**!\n```%s```\nDiscarded:\n```%s```' % (total, dices, discarded_dices) 
+    except:
+        print(traceback.format_exc())
+        msg = '.{0.author.mention} specified an invalid Shadowrun dice expression.'
     return msg[1:]
 
 async def get_shadowrun_roll(message):
@@ -283,7 +320,7 @@ async def get_shadowrun_roll(message):
             else:
                 has_msg = 'Failed'
             if required_successes > 0:
-                msg += '\n{0.author.mention} has **%s**! (Hits: **%d %s %d** Dices: **%d**, Limit: **%d**, 1s: **%d %s %d**)\n```%s```' % (has_msg, hits, '≥' if success else '<', required_successes, dices, limit, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
+                msg += '\n{0.author.mention} has **%s**! (Hits: **%d %s %d**, Dices: **%d**, Limit: **%d**, 1s: **%d %s %d**)\n```%s```' % (has_msg, hits, '≥' if success else '<', required_successes, dices, limit, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
             else:
                 msg += '\n{0.author.mention} has **%s** hits! (Dices: **%d**, Limit: **%d**, 1s: **%d %s %d**)\n```%s```' % (hits, dices, limit, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
     except:
