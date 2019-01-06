@@ -187,7 +187,7 @@ async def on_message(message):
     except:
         # Catch anything
         print(traceback.format_exc())
-        await CLIENT.send_message(message.channel, msg.format("{0.author.mention} Something went wrong! Please try again."))
+        await CLIENT.send_message(message.channel, msg.format("Something went wrong! Please try again."))
 
 @CLIENT.event
 async def on_ready():
