@@ -168,19 +168,12 @@ async def get_dices(parsed_message, traveller = False):
         split_match[1] = int(split_match[1])
         dices.append(DiceRoll((split_match[0], split_match[1]), 0))
 
-    if traveller:
-        for dice in dices:
-            if not dice.roll_val:
-                for x in range(0, dice.dice_tuple[0]):
-                    dice.roll_val = int(str(dice.roll_val) + str(await get_random_number(1, dice.dice_tuple[1])))
-    else:
-        for dice in dices:
-            if not dice.roll_val:
-                for _ in range(0, dice.dice_tuple[0]):
-                    dice.roll_val += await get_random_number(1, dice.dice_tuple[1])
-
-
     for dice in dices:
+        for _ in range(0, dice.dice_tuple[0]):
+            if traveller:
+                dice.roll_val = int(str(dice.roll_val) + str(await get_random_number(1, dice.dice_tuple[1])))
+            else:
+                dice.roll_val += await get_random_number(1, dice.dice_tuple[1])
         parsed_message = DICE_RE.sub("%s" % dice.roll_val, parsed_message, 1)
 
     return parsed_message
