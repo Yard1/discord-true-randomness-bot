@@ -122,6 +122,9 @@ async def get_random_numbers(count, lo, hi):
         print('Python PRNG')
         return [random.randint(lo, hi) for _ in range(count)]
 
+async def get_random_number(lo, hi):
+    return await get_random_numbers(1, lo, hi)[0]
+
 async def eval_math_expression(expression):
     '''Safely evaluate math expressions using asteval'''
     expression = expression.replace("^", "**")
@@ -149,28 +152,25 @@ class DiceRoll:
         self.dice_tuple = dice_tuple
         self.roll_val = roll_val
 
-async def get_dices(parsed_message):
+async def get_dices(parsed_message, traveller = False):
     '''Replace all dices expression in a string with generated numbers'''
     dices = []
-    get_randomness = {}
     for match in DICE_RE.findall(parsed_message):
         split_match = match.split("d")
         split_match[0] = int(split_match[0])
         split_match[1] = int(split_match[1])
-
         dices.append(DiceRoll((split_match[0], split_match[1]), 0))
-        if split_match[1] in get_randomness:
-            get_randomness[split_match[1]] += split_match[0]
-        else:
-            get_randomness[split_match[1]] = split_match[0]
 
-    for key, value in get_randomness.items():
-        numbers = await get_random_numbers(value, 1, key)
-        #print(numbers)
+    if traveller:
         for dice in dices:
-            if not dice.roll_val and dice.dice_tuple[1] == key:
+            if not dice.roll_val:
+                for x in range(0, dice.dice_tuple[0]):
+                    dice.roll_val += await get_random_number(1, dice.dice_tuple[1])*(10**x)
+    else:
+        for dice in dices:
+            if not dice.roll_val:
                 for _ in range(0, dice.dice_tuple[0]):
-                    dice.roll_val += numbers.pop()
+                    dice.roll_val += await get_random_number(1, dice.dice_tuple[1])
 
 
     for dice in dices:
@@ -179,8 +179,8 @@ async def get_dices(parsed_message):
     return parsed_message
 
 # Commands
-async def get_roll(message):
-    '''Handles the !roll command'''
+async def get_roll(message, traveller = False):
+    '''Handles the !roll and !roll-traveller command'''
     if not isinstance(message, str):
         message = message.content
     message = message.replace("`", "")
@@ -188,11 +188,11 @@ async def get_roll(message):
         split_message = message.split(" ", 1)
         msg = ""
         parsed_message = await parse_message(split_message[1])
-        parsed_message = await get_dices(parsed_message)
+        parsed_message = await get_dices(parsed_message, traveller)
         msg = await handle_rolls(parsed_message.split(","), message)
     except:
         print(traceback.format_exc())
-        msg = '.{0.author.mention} specified an invalid dice expression.'
+        msg = '.{0.author.mention} specified an invalid %sdice expression.' % ('Traveller ' if traveller else '')
     return msg[1:]
 
 async def handle_rolls(rolls_list, message):
@@ -282,7 +282,7 @@ async def get_asoiaf_roll(message):
                 msg += '\n{0.author.mention} has a total of **%s**!\n```%s```' % (total, dices)
     except:
         print(traceback.format_exc())
-        msg = '.{0.author.mention} specified an invalid Shadowrun dice expression.'
+        msg = '.{0.author.mention} specified an invalid ASOIAF dice expression.'
     return msg[1:]
 
 async def get_shadowrun_roll(message):

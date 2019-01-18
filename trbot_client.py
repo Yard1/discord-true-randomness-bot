@@ -47,6 +47,12 @@ async def on_message(message):
                 msg = '{0.author.mention} specified an invalid dice expression.'
             else:
                 msg = await get_roll(message)
+        elif message.content.startswith('!roll-traveller ') or message.content == '!roll-traveller' or message.content.startswith('!roll-trv ') or message.content == '!roll-trv':
+            print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
+            if message.content.strip() == '!roll':
+                msg = '{0.author.mention} specified an invalid Traveller dice expression.'
+            else:
+                msg = await get_roll(message, True)
         elif message.content.startswith('!roll-sr ') or message.content == '!roll-sr':
             print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
             if message.content.strip() == '!roll-sr':
