@@ -99,7 +99,7 @@ COMPARATORS = {
 # Functions
 async def get_random_numbers(count, lo, hi):
     '''Main function to get a list of count random numbers from range lo to hi (inclusive)'''
-    print("Roll %s * (%s - %s)" % (count, lo, hi))
+    print("Generate %s RNs (%s - %s)" % (count, lo, hi))
     if lo > hi:
         raise ValueError('lo %s bigger than hi %s!' % (lo, hi))
     if hi >= MAX_RANGE:
@@ -109,12 +109,7 @@ async def get_random_numbers(count, lo, hi):
     try:
         list_to_return = []
         for _ in range(count):
-            try:
-                list_to_return.append(RAND_GEN.randint(lo, hi))
-            except:
-                # Use regular Python PRNG from random package if true randomness is unavailable
-                print('Python PRNG in list')
-                list_to_return.append(random.randint(lo, hi))
+            list_to_return.append(get_random_number(lo, hi))
         return list_to_return
     except:
         # Use regular Python PRNG from random package if true randomness is unavailable
@@ -123,7 +118,19 @@ async def get_random_numbers(count, lo, hi):
         return [random.randint(lo, hi) for _ in range(count)]
 
 async def get_random_number(lo, hi):
-    return await get_random_numbers(1, lo, hi)[0]
+    print("Generate RN between (%s - %s)" % (lo, hi))
+    if lo > hi:
+        raise ValueError('lo %s bigger than hi %s!' % (lo, hi))
+    if hi >= MAX_RANGE:
+        raise ValueError('hi %s bigger than MAX_RANGE %s!' % hi)
+    result = 0
+    try:
+        result = RAND_GEN.randint(lo, hi)
+    except:
+        # Use regular Python PRNG from random package if true randomness is unavailable
+        print('Falling back to Python PRNG')
+        result = random.randint(lo, hi)
+    return result
 
 async def eval_math_expression(expression):
     '''Safely evaluate math expressions using asteval'''
@@ -165,7 +172,7 @@ async def get_dices(parsed_message, traveller = False):
         for dice in dices:
             if not dice.roll_val:
                 for x in range(0, dice.dice_tuple[0]):
-                    dice.roll_val += await get_random_number(1, dice.dice_tuple[1])*(10**x)
+                    dice.roll_val = int(str(dice.roll_val) + str(await get_random_number(1, dice.dice_tuple[1])))
     else:
         for dice in dices:
             if not dice.roll_val:
@@ -222,7 +229,7 @@ async def handle_rolls(rolls_list, message):
                 msg += ' (`%s`)' % item
     return msg
 
-async def get_repeated_roll(message):
+async def get_repeated_roll(message, traveller = False):
     if not isinstance(message, str):
         message = message.content
     message = message.replace("`", "")
@@ -239,12 +246,12 @@ async def get_repeated_roll(message):
         print(repeat)
         repeated_list = ",".join([parsed_message[0]] * repeat)
         print(repeated_list)
-        parsed_message = await get_dices(repeated_list)
+        parsed_message = await get_dices(repeated_list, traveller)
         print(parsed_message)
         msg = await handle_rolls(parsed_message.split(","), message)
     except:
         print(traceback.format_exc())
-        msg = '.{0.author.mention} specified an invalid dice expression.'
+        msg = '.{0.author.mention} specified an invalid %sdice expression.' % ('Traveller ' if traveller else '')
     return msg[1:]
 
 async def get_asoiaf_roll(message):
@@ -355,8 +362,8 @@ async def get_rand(message):
         split_message = split_message[1].split(",")
         if len(split_message) > 2:
             raise ValueError('Too many arguments.')
-        random_numbers = await get_random_numbers(1, int(split_message[0]), int(split_message[1]))
-        msg = '{0.author.mention}, your random number is **%s**.' % random_numbers[0]
+        random_number = await get_random_number(int(split_message[0]), int(split_message[1]))
+        msg = '{0.author.mention}, your random number is **%s**.' % random_number
     except:
         print(traceback.format_exc())
         msg = '{0.author.mention} specified an invalid rand expression.'
