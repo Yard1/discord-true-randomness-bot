@@ -109,7 +109,8 @@ async def get_random_numbers(count, lo, hi):
     try:
         list_to_return = []
         for _ in range(count):
-            list_to_return.append(get_random_number(lo, hi))
+            number = await get_random_number(lo, hi)
+            list_to_return.append(number)
         return list_to_return
     except:
         # Use regular Python PRNG from random package if true randomness is unavailable
