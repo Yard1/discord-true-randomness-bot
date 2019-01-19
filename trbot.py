@@ -313,7 +313,7 @@ async def get_shadowrun_roll(message):
             if hits > limit:
                 hits = limit
             success = hits >= required_successes
-            glitch = results[2] > dices // 2
+            glitch = results[2] >= round(dices / 2)
             
             if success and not glitch:
                 has_msg = 'Succeeded'
@@ -325,9 +325,9 @@ async def get_shadowrun_roll(message):
             else:
                 has_msg = 'Failed'
             if required_successes > 0:
-                msg += '\n{0.author.mention} has **%s**! (Hits: **%d %s %d**, Dices: **%d**, Limit: **%d**, 1s: **%d %s %d**)\n```%s```' % (has_msg, hits, '≥' if success else '<', required_successes, dices, limit, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
+                msg += '\n{0.author.mention} has **%s**! (Hits: **%d %s %d**, Dices: **%d**, Limit: **%d**, 1s: **%d %s %d**)\n```%s```' % (has_msg, hits, '≥' if success else '<', required_successes, dices, limit, results[2], '≥' if glitch else '<', round(dices / 2), results[0]) 
             else:
-                msg += '\n{0.author.mention} has %s**%s** hits! (Dices: **%d**, Limit: **%d**, 1s: **%d %s %d**)\n```%s```' % ("Glitched with " if glitch else "", hits, dices, limit, results[2], '≥' if glitch else '<', dices // 2, results[0]) 
+                msg += '\n{0.author.mention} has %s**%s** hits! (Dices: **%d**, Limit: **%d**, 1s: **%d %s %d**)\n```%s```' % ("Glitched with " if glitch else "", hits, dices, limit, results[2], '≥' if glitch else '<', round(dices / 2), results[0]) 
     except:
         print(traceback.format_exc())
         msg = '.{0.author.mention} specified an invalid Shadowrun dice expression.'
