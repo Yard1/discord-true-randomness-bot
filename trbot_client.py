@@ -40,17 +40,11 @@ async def on_message(message):
         # Commands - !help, !roll, !rand, !8ball, !quote
         if message.content == '!help' or (re.search("help", message.content, re.IGNORECASE) and CLIENT.user in message.mentions):
             print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
-            msg = 'List of commands:\n**!roll** - gives random dice rolls and calculates the resulting mathematical expression. Example: `!roll (1d100+10)/10`\n**!roll-traveller** - gives random dice rolls and calculates the resulting mathematical expression. Uses Traveller dice system (dices used as digits in a number, eg. 2d6 means that the number is composed of two digits, each one being a 1d6) Example: `!roll-traveller (1d100+10)/10`\n**!roll-repeat** - first argument is a dice roll/anything that would work with !roll, second argument is how many times it should be repeated. Example: `!roll-repeat 2d20+2, 4`\n**!roll-traveller-repeat** - Same as !roll-repeat, but for Traveller dice.\n**!roll-sr** rolls Shadowrun dice in format: `number of dice`d`limit`l `>` `threshold`. No math operations are supported. Example: `!roll-sr 5d5l > 3`\n**!roll-asoiaf** rolls ASOIAF dice in format: `number of dice`d`bonus`b. No math operations are supported. Example: `!roll-asoiaf 5d1b`\n**!rand** - returns a random number from given range (inclusive). Example: `!rand 1,10`\n**!8ball**, **!eightball** - gives a random eightball answer.\n**!quote** - gives Thought of the Day.\n**!fortune**, **!literature**, **!riddle** - works like UNIX `fortunes` command, with dicts being separate.'
+            msg = 'List of commands:\n**!roll** - gives random dice rolls and calculates the resulting mathematical expression. Example: `!roll (1d100+10)/10`\n**!roll-repeat** - first argument is a dice roll/anything that would work with !roll, second argument is how many times it should be repeated. Example: `!roll-repeat 2d20+2, 4`\nUse `d` for regular dice and `t` for Traveller dice. Does not apply to commands below.\n\n**!roll-sr** rolls Shadowrun dice in format: `number of dice`d`limit`l `>` `threshold`. No math operations are supported. Example: `!roll-sr 5d5l > 3`\n**!roll-asoiaf** rolls ASOIAF dice in format: `number of dice`d`bonus`b. No math operations are supported. Example: `!roll-asoiaf 5d1b`\n**!rand** - returns a random number from given range (inclusive). Example: `!rand 1,10`\n**!8ball**, **!eightball** - gives a random eightball answer.\n**!quote** - gives Thought of the Day.\n**!fortune**, **!literature**, **!riddle** - works like UNIX `fortunes` command, with dicts being separate.'
         elif message.content.startswith('!roll ') or message.content == '!roll':
             print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
             if message.content.strip() == '!roll':
                 msg = '{0.author.mention} specified an invalid dice expression.'
-            else:
-                msg = await get_roll(message)
-        elif message.content.startswith('!roll-traveller ') or message.content == '!roll-traveller' or message.content.startswith('!roll-trv ') or message.content == '!roll-trv':
-            print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
-            if message.content.strip() == '!roll-traveller' or message.content.strip() == '!roll-trv':
-                msg = '{0.author.mention} specified an invalid Traveller dice expression.'
             else:
                 msg = await get_roll(message, True)
         elif message.content.startswith('!roll-sr ') or message.content == '!roll-sr':
@@ -69,12 +63,6 @@ async def on_message(message):
             print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
             if message.content.strip() == '!roll-repeat' or message.content.strip() == '!roll-r':
                 msg = '{0.author.mention} specified an invalid repeated dice expression.'
-            else:
-                msg = await get_repeated_roll(message)
-        elif message.content.startswith('!roll-traveller-repeat ') or message.content == '!roll-traveller-repeat' or message.content.startswith('!roll-trv-r ') or message.content == '!roll-trv-r':
-            print('User %s (ID: %s, Server: %s) made a command %s' % (message.author.name, message.author.id, message.server, message.content))
-            if message.content.strip() == '!roll-traveller-repeat' or message.content.strip() == '!roll-trv-r' :
-                msg = '{0.author.mention} specified an invalid repeated Traveller dice expression.'
             else:
                 msg = await get_repeated_roll(message, True)
         elif message.content.startswith('!rand ') or message.content == '!rand':
