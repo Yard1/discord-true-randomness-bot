@@ -457,7 +457,7 @@ async def process_reminder_message(message, current_time):
         message_content = message.content
     message_content = message_content.replace("`", "")
     try:
-        print(message_content)
+        #print(message_content)
         split_message = message_content.split(" ", 1)
         msg = ""
         parsed_message = split_message[1].strip()
@@ -465,7 +465,7 @@ async def process_reminder_message(message, current_time):
         reminder_message = parsed_message[0]
         time = 0
         parsed_message[1] = await parse_message(parsed_message[1])
-        print(parsed_message[1])
+        #print(parsed_message[1])
         findall = TIME_RE.findall(parsed_message[1])
         if findall:
             for match in findall:
