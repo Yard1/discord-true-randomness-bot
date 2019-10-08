@@ -494,4 +494,6 @@ async def message_reminder(current_time, reminder, reminder_dict, total_reminder
     if reminder_dict[reminder.user] == 0:
         reminder_dict.pop(reminder.user)
     total_reminders -=1
-    await reminder.user.send("Hi there! Here is your reminder for `%s %s` from `%s %s`:\n>>> %s" % (str(reminder.deliver), str("UTC")+str(TIMEZONE_OFFSET/3600), str(reminder.sent), str("UTC")+str(TIMEZONE_OFFSET/3600), reminder.text))
+    offset_message = int(TIMEZONE_OFFSET/3600)
+    offset_message = "+"+str(offset_message) if offset_message >= 0 else str(offset_message)
+    await reminder.user.send("Hi there! Here is your reminder for `%s %s` from `%s %s`:\n>>> %s" % (str(reminder.deliver), str("UTC")+offset_message, str(reminder.sent), str("UTC")+offset_message, reminder.text))
