@@ -457,12 +457,14 @@ async def process_reminder_message(message, current_time):
         message_content = message.content
     message_content = message_content.replace("`", "")
     try:
+        print(message_content)
         split_message = message_content.split(" ", 1)
         msg = ""
-        parsed_message = await parse_message(split_message[1])
+        parsed_message = split_message[1].strip()
         parsed_message = parsed_message.split(",")
         reminder_message = parsed_message[0]
         time = 0
+        parsed_message[1] = await parse_message(parsed_message[1])
         print(parsed_message[1])
         findall = TIME_RE.findall(parsed_message[1])
         if findall:
@@ -492,4 +494,4 @@ async def message_reminder(current_time, reminder, reminder_dict, total_reminder
     if reminder_dict[reminder.user] == 0:
         reminder_dict.pop(reminder.user)
     total_reminders -=1
-    await reminder.user.send("Hi there! Here is your reminder for `%s %s` from `%s %s`:\n>>> %s" % (str(reminder.deliver), str("UTC+" + TIMEZONE_OFFSET), str(reminder.sent), str("UTC+" + TIMEZONE_OFFSET), reminder.text))
+    await reminder.user.send("Hi there! Here is your reminder for `%s %s` from `%s %s`:\n>>> %s" % (str(reminder.deliver), str("UTC")+str(TIMEZONE_OFFSET/3600), str(reminder.sent), str("UTC")+str(TIMEZONE_OFFSET/3600), reminder.text))
