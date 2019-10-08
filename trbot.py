@@ -13,6 +13,8 @@ from wordcloud import WordCloud
 import datetime
 import os
 import zipfile
+import asyncio
+import time
 from enum import Enum
 
 AEVAL = Interpreter()
@@ -50,6 +52,9 @@ EXPLAIN_BOT_RE = re.compile(r"(?:how)|(?:explain)|(?:explanation)|(?:why)|(?:wha
 HIGH_FIVE_RE = re.compile(r"(?:high five)|(?:✋)", re.IGNORECASE)
 MATH_EXPRESSION_RE = re.compile(r"^[0-9\.\+\-\/\*\^\%\(\)\s]+$")
 WORD_CLOUD_RE = re.compile(r"(\<\@[0-9]*?\>)|(\:(.*?)\:)")
+TIME_RE = re.compile(r"(([0-9]+)(hours?|minutes?|seconds?))", re.IGNORECASE)
+
+TIMEZONE_OFFSET = time.timezone
 
 # Lists
 EIGHTBALL = [
@@ -201,10 +206,10 @@ async def get_dices(parsed_message, traveller = False):
 async def get_roll(message, traveller = False):
     '''Handles the !roll and !roll-traveller command'''
     if not isinstance(message, str):
-        message = message.content
-    message = message.replace("`", "")
+        message_content = message.content
+    message_content = message_content.replace("`", "")
     try:
-        split_message = message.split(" ", 1)
+        split_message = message_content.split(" ", 1)
         msg = ""
         parsed_message = await parse_message(split_message[1])
         parsed_message = await get_dices(parsed_message, traveller)
@@ -243,10 +248,10 @@ async def handle_rolls(rolls_list, message):
 
 async def get_repeated_roll(message, traveller = False):
     if not isinstance(message, str):
-        message = message.content
-    message = message.replace("`", "")
+        message_content = message.content
+    message_content = message_content.replace("`", "")
     try:
-        split_message = message.split(" ", 1)
+        split_message = message_content.split(" ", 1)
         msg = ""
         parsed_message = await parse_message(split_message[1])
         parsed_message = parsed_message.split(",")
@@ -269,10 +274,10 @@ async def get_repeated_roll(message, traveller = False):
 async def get_asoiaf_roll(message):
     '''Handles the !roll-asoiaf command'''
     if not isinstance(message, str):
-        message = message.content
-    message = message.replace("`", "")
+        message_content = message.content
+    message_content = message_content.replace("`", "")
     try:
-        split_message = message.split(" ", 1)
+        split_message = message_content.split(" ", 1)
         msg = ""
         parsed_message = await parse_message(split_message[1])
         for item in parsed_message.split(","):
@@ -307,10 +312,10 @@ async def get_asoiaf_roll(message):
 async def get_shadowrun_roll(message):
     '''Handles the !roll-sr command'''
     if not isinstance(message, str):
-        message = message.content
-    message = message.replace("`", "")
+        message_content = message.content
+    message_content = message_content.replace("`", "")
     try:
-        split_message = message.split(" ", 1)
+        split_message = message_content.split(" ", 1)
         msg = ""
         parsed_message = await parse_message(split_message[1])
         for item in parsed_message.split(","):
@@ -367,10 +372,10 @@ async def get_shadowrun_dices(number_of_dices):
 async def get_rand(message):
     '''Handles the !rand command'''
     if not isinstance(message, str):
-        message = message.content
-    message = message.replace("`", "")
+        message_content = message.content
+    message_content = message_content.replace("`", "")
     try:
-        split_message = message.split(" ", 1)
+        split_message = message_content.split(" ", 1)
         msg = ""
         split_message = split_message[1].split(",")
         if len(split_message) > 2:
@@ -411,7 +416,7 @@ async def get_text_from_channels(channels, client, size=80, users=None):
         print("Getting text from %s" % [x.name for x in channels])
     messages = []
     for channel in channels:
-        async for message in client.logs_from(channel, limit=10000000):
+        async for message in channel.history(limit=10000000):
             if users:
                 if message.author.name in users:
                     messages.append(message)
@@ -437,3 +442,54 @@ async def create_wordcloud(text, size=-1):
     else:
         WordCloud(width=1600, height=800).generate(text).to_file(filename)
     return filename
+
+class Reminder:
+    def __init__(self, user, text, deliver, sent):
+        self.user = user
+        self.text = text
+        self.deliver = deliver
+        self.sent = sent
+
+async def process_reminder_message(message, current_time):
+    reminder = None
+    reminder_user = message.author
+    if not isinstance(message, str):
+        message_content = message.content
+    message_content = message_content.replace("`", "")
+    try:
+        split_message = message_content.split(" ", 1)
+        msg = ""
+        parsed_message = await parse_message(split_message[1])
+        parsed_message = parsed_message.split(",")
+        reminder_message = parsed_message[0]
+        time = 0
+        print(parsed_message[1])
+        findall = TIME_RE.findall(parsed_message[1])
+        if findall:
+            for match in findall:
+                print(match)
+                if match[2] == "hours":
+                    time += 60*60*int(match[1])
+                elif match[2] == "minutes":
+                    time += 60*int(match[1])
+                elif match[2] == "seconds":
+                    time += int(match[1])
+            if time >= 172800:
+                raise ValueError("Time too big")
+            reminder = Reminder(reminder_user, reminder_message, current_time+datetime.timedelta(0,time), current_time)
+            msg = '{0.author.mention}, I will remind you in %s about:\n>>> %s' % (str(datetime.timedelta(seconds=time)), reminder_message)
+        else:
+            raise ValueError("Wrong remindme command format")
+    except:
+        print(traceback.format_exc())
+        msg = '{0.author.mention} specified an invalid remindme expression, or the time was too big!'
+    return (msg, reminder)
+
+
+async def message_reminder(current_time, reminder, reminder_dict, total_reminders):
+    await asyncio.sleep((reminder.deliver-current_time).total_seconds())
+    reminder_dict[reminder.user] -= 1
+    if reminder_dict[reminder.user] == 0:
+        reminder_dict.pop(reminder.user)
+    total_reminders -=1
+    await reminder.user.send("Hi there! Here is your reminder for `%s %s` from `%s %s`:\n>>> %s" % (str(reminder.deliver), str("UTC+" + TIMEZONE_OFFSET), str(reminder.sent), str("UTC+" + TIMEZONE_OFFSET), reminder.text))
