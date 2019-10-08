@@ -101,11 +101,14 @@ async def on_message(message):
         elif message.content.startswith('!riddle ') or message.content == '!riddle':
             print('User %s (ID: %s, Guild: %s) made a command %s' % (message.author.name, message.author.id, message.guild, message.content))
             msg = '{0.author.mention} 🤔:\n%s' % await get_fortune(RIDDLES_FILE, RIDDLES_LIST)
+        elif message.content == '!remindMeQueue' or message.content == '!remindmequeue':
+            print('User %s (ID: %s, Guild: %s) made a command %s' % (message.author.name, message.author.id, message.guild, message.content))
+            msg = "{0.author.mention}, you have %s reminders in queue!" % ("0" if message.author not in REMINDER_DICT else str(REMINDER_DICT[message.author]))
         elif message.content.startswith('!remindMe ') or message.content == '!remindMe' or message.content.startswith('!remindme ') or message.content == '!remindme':
             print('User %s (ID: %s, Guild: %s) made a command %s' % (message.author.name, message.author.id, message.guild, message.content))
             if message.author in REMINDER_DICT and REMINDER_DICT[message.author] >= 5:
                 msg = "{0.author.mention} has too many reminders (5) already in queue!"
-            elif TOTAL_REMINDERS >= 50:
+            elif TOTAL_REMINDERS >= 100:
                 msg = "I already have too many reminders to process, sorry! :("
             else:
                 current_time = datetime.datetime.now()

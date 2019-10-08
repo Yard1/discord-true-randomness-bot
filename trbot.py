@@ -470,11 +470,11 @@ async def process_reminder_message(message, current_time):
         if findall:
             for match in findall:
                 print(match)
-                if match[2] == "hours":
+                if match[2] == "hours" or match[2] == "hour":
                     time += 60*60*int(match[1])
-                elif match[2] == "minutes":
+                elif match[2] == "minutes" or match[2] == "minute":
                     time += 60*int(match[1])
-                elif match[2] == "seconds":
+                elif match[2] == "seconds" or match[2] == "second":
                     time += int(match[1])
             if time >= 172800:
                 raise ValueError("Time too big")
