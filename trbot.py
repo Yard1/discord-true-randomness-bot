@@ -213,7 +213,7 @@ async def get_roll(message, traveller = False):
         msg = ""
         parsed_message = await parse_message(split_message[1])
         parsed_message = await get_dices(parsed_message, traveller)
-        msg = await handle_rolls(parsed_message.split(","), message)
+        msg = await handle_rolls(parsed_message.split(","), message_content)
     except:
         print(traceback.format_exc())
         msg = '.{0.author.mention} specified an invalid %sdice expression.' % ('Traveller ' if traveller else '')
@@ -265,7 +265,7 @@ async def get_repeated_roll(message, traveller = False):
         print(repeated_list)
         parsed_message = await get_dices(repeated_list, traveller)
         print(parsed_message)
-        msg = await handle_rolls(parsed_message.split(","), message)
+        msg = await handle_rolls(parsed_message.split(","), message_content)
     except:
         print(traceback.format_exc())
         msg = '.{0.author.mention} specified an invalid %sdice expression.' % ('Traveller ' if traveller else '')
