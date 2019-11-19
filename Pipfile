@@ -15,12 +15,13 @@ wordcloud = "*"
 matplotlib = "*"
 "urllib3" = ">=1.24.2"
 schedule = "*"
+"discord.py" = {git = "https://github.com/Rapptz/discord.py.git"}
 
 [dev-packages]
 pylint = "*"
 
 [requires]
-python_version = "3.6.7"
+python_version = "3.6"
 
 [pipenv]
 allow_prereleases = true
