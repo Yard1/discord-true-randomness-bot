@@ -4,7 +4,6 @@ name = "pypi"
 verify_ssl = true
 
 [packages]
-discord = "*"
 async-timeout = "*"
 asteval = "*"
 asyncio = "*"
@@ -15,7 +14,7 @@ wordcloud = "*"
 matplotlib = "*"
 "urllib3" = ">=1.24.2"
 schedule = "*"
-"discord.py" = {git = "https://github.com/Rapptz/discord.py.git"}
+discord = {git = "https://github.com/Rapptz/discord.py.git"}
 
 [dev-packages]
 pylint = "*"
