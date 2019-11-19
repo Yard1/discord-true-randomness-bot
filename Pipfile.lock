@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "e8f2b2df3dd10ef94aee5225984d08eb12c253941444ee6ba469ccc09a0f0fd6"
+            "sha256": "b5da7f47f62775aedfaca3870384e0f8d4d58b9efa40338f70a98cc18e810120"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -98,7 +98,8 @@
         },
         "discord": {
             "editable": true,
-            "git": "https://github.com/Rapptz/discord.py.git"
+            "git": "https://github.com/Rapptz/discord.py.git",
+            "ref": "master"
         },
         "idna": {
             "hashes": [
