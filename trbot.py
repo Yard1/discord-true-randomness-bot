@@ -32,7 +32,7 @@ CURRENT_QUOTE = ("", None)
 # Randomness module
 RANDOM_BYTES_COUNT = 1024
 MAX_RANGE = 4294967295  #2**32 - 1
-RANDOMNESS_SOURCE = OnlineRandomnessSource.RANDOM_ORG
+RANDOMNESS_SOURCE = OnlineRandomnessSource.QRNG_ANU
 try:
     RAND_GEN = sourcerandom.SourceRandom(source=RANDOMNESS_SOURCE, cache_size=RANDOM_BYTES_COUNT, preload=True)
 except:
