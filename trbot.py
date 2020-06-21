@@ -32,7 +32,12 @@ CURRENT_QUOTE = ("", None)
 # Randomness module
 RANDOM_BYTES_COUNT = 1024
 MAX_RANGE = 4294967295  #2**32 - 1
-RAND_GEN = sourcerandom.SourceRandom(source=OnlineRandomnessSource.RANDOM_ORG, cache_size=RANDOM_BYTES_COUNT, preload=True)
+RANDOMNESS_SOURCE = OnlineRandomnessSource.RANDOM_ORG
+try:
+    RAND_GEN = sourcerandom.SourceRandom(source=RANDOMNESS_SOURCE, cache_size=RANDOM_BYTES_COUNT, preload=True)
+except:
+    print(traceback.format_exc())
+    RAND_GEN = None
 
 # Regex
 DICE_RE = re.compile(r"[0-9]*d[0-9]*", re.IGNORECASE)
@@ -127,6 +132,7 @@ async def get_random_numbers(count, lo, hi):
         return [random.randint(lo, hi) for _ in range(count)]
 
 async def get_random_number(lo, hi):
+    global RAND_GEN, RANDOM_BYTES_COUNT, RANDOMNESS_SOURCE
     print("Generate RN between (%s - %s)" % (lo, hi))
     if lo > hi:
         raise ValueError('lo %s bigger than hi %s!' % (lo, hi))
@@ -139,6 +145,12 @@ async def get_random_number(lo, hi):
         # Use regular Python PRNG from random package if true randomness is unavailable
         print('Falling back to Python PRNG')
         result = random.randint(lo, hi)
+        if not RAND_GEN:
+            try:
+                RAND_GEN = sourcerandom.SourceRandom(source=RANDOMNESS_SOURCE, cache_size=RANDOM_BYTES_COUNT, preload=True)
+            except:
+                print(traceback.format_exc())
+                RAND_GEN = None
     return result
 
 async def eval_math_expression(expression):
