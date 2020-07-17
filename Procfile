@@ -1,1 +1,1 @@
-worker: python trbot_client.py $discord_api_key
+worker: python trbot_client.py $discord_api_key & python booru-bot/booru_bot.py $discord_api_key_bb & wait -n
