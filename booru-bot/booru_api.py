@@ -450,12 +450,15 @@ class Shimmie2(Danbooru):
                 break
             print(f"Found API link: {api_url}")
             js = await fetch_xml(api_url)
-            js = (
-                [js["posts"]["post"]]
-                if not isinstance(js["posts"]["post"], list)
-                else js["posts"]["post"]
-            )
-            combined_js.extend(js)
+            try:
+                js = (
+                    [js["posts"]["post"]]
+                    if not isinstance(js["posts"]["post"], list)
+                    else js["posts"]["post"]
+                )
+                combined_js.extend(js)
+            except:
+                return combined_js
             if len(js) < self.max_limit:
                 limit = 0
             else:
@@ -468,8 +471,9 @@ class Shimmie2(Danbooru):
         return combined_js
 
 
-class Deribooru(Booru):
-    booru_type = "Deribooru"
+# Derpibooru
+class Philomena(Booru):
+    booru_type = "Philomena"
     booru_url = None
     booru_api_url = None
     max_limit = 50
@@ -571,7 +575,7 @@ async def create_booru(booru_url: str) -> Booru:
         booru = Moebooru(booru_url)
     api_url = f"{booru_url}/api/v1/json/search/images"
     if not booru and await check_if_url_works(api_url):
-        booru = Deribooru(booru_url)
+        booru = Philomena(booru_url)
     api_url = f"{booru_url}/api/danbooru/post/index.xml"
     if not booru and await check_if_url_works(api_url):
         booru = Shimmie2(booru_url)
