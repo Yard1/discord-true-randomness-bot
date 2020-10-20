@@ -9,6 +9,7 @@ import discord
 import shlex
 import sys
 from trbot import *
+from trbot_google import get_google_answer
 
 QUOTE_LOCK = asyncio.Lock()
 
@@ -46,7 +47,7 @@ async def on_message(message):
         # Commands - !help, !roll, !rand, !8ball, !quote
         if message.content == '!help' or (re.search("help", message.content, re.IGNORECASE) and CLIENT.user in message.mentions):
             print('User %s (ID: %s, Guild: %s) made a command %s' % (message.author.name, message.author.id, message.guild, message.content))
-            msg = 'List of commands:\n**!roll** - gives random dice rolls and calculates the resulting mathematical expression. Example: `!roll (1d100+10)/10`\n**!roll-repeat** - first argument is a dice roll/anything that would work with !roll, second argument is how many times it should be repeated. Example: `!roll-repeat 2d20+2, 4`\nUse `d` for regular dice and `t` for Traveller dice. Does not apply to commands below.\n\n**!roll-sr** rolls Shadowrun dice in format: `number of dice`d`limit`l `>` `threshold`. No math operations are supported. Example: `!roll-sr 5d5l > 3`\n**!roll-asoiaf** rolls ASOIAF dice in format: `number of dice`d`bonus`b. No math operations are supported. Example: `!roll-asoiaf 5d1b`\n**!rand** - returns a random number from given range (inclusive). Example: `!rand 1,10`\n**!8ball**, **!eightball** - gives a random eightball answer.\n**!quote** - gives Thought of the Day.\n**!fortune**, **!literature**, **!riddle** - works like UNIX `fortunes` command, with dicts being separate.\n**!remindMe** - will send you a DM with the contents of your reminder. Format: `message, #hours/minutes/seconds`. Can do various time units at the same time. MESSAGE CANNOT CONTAIN COMMAS'
+            msg = 'List of commands:\n**!roll** - gives random dice rolls and calculates the resulting mathematical expression. Example: `!roll (1d100+10)/10`\n**!roll-repeat** - first argument is a dice roll/anything that would work with !roll, second argument is how many times it should be repeated. Example: `!roll-repeat 2d20+2, 4`\nUse `d` for regular dice and `t` for Traveller dice. Does not apply to commands below.\n\n**!roll-sr** rolls Shadowrun dice in format: `number of dice`d`limit`l `>` `threshold`. No math operations are supported. Example: `!roll-sr 5d5l > 3`\n**!roll-asoiaf** rolls ASOIAF dice in format: `number of dice`d`bonus`b. No math operations are supported. Example: `!roll-asoiaf 5d1b`\n**!rand** - returns a random number from given range (inclusive). Example: `!rand 1,10`\n**!8ball**, **!eightball** - gives a random eightball answer.\n**!quote** - gives Thought of the Day.\n**!fortune**, **!literature**, **!riddle** - works like UNIX `fortunes` command, with dicts being separate.\n**!answer** - ask bot a question, and it will try to answer it ||or rather, Google it||\n**!remindMe** - will send you a DM with the contents of your reminder. Format: `message, #hours/minutes/seconds`. Can do various time units at the same time. MESSAGE CANNOT CONTAIN COMMAS'
         elif message.content.startswith('!roll ') or message.content == '!roll':
             print('User %s (ID: %s, Guild: %s) made a command %s' % (message.author.name, message.author.id, message.guild, message.content))
             if message.content.strip() == '!roll':
@@ -101,6 +102,9 @@ async def on_message(message):
         elif message.content.startswith('!riddle ') or message.content == '!riddle':
             print('User %s (ID: %s, Guild: %s) made a command %s' % (message.author.name, message.author.id, message.guild, message.content))
             msg = '{0.author.mention} 🤔:\n%s' % await get_fortune(RIDDLES_FILE, RIDDLES_LIST)
+        elif message.content.startswith('!answer ') or message.content == '!answer':
+            print('User %s (ID: %s, Guild: %s) made a command %s' % (message.author.name, message.author.id, message.guild, message.content))
+            msg = '{0.author.mention}, %s' % await get_google_answer(message)
         elif message.content == '!remindMeQueue' or message.content == '!remindmequeue':
             print('User %s (ID: %s, Guild: %s) made a command %s' % (message.author.name, message.author.id, message.guild, message.content))
             msg = "{0.author.mention}, you have %s reminders in queue!" % ("0" if message.author not in REMINDER_DICT else str(REMINDER_DICT[message.author]))
@@ -128,6 +132,12 @@ async def on_message(message):
                 if EXPLAIN_BOT_RE.search(message.content):
                     print('User %s (ID: %s, Guild: %s) asked to explain %s' % (message.author.name, message.author.id, message.guild, message.content))
                     await message.channel.send("%s, %s" % (message.author.mention, random.choice(EXPLAIN).format(message)))
+                    return
+                if ASK_BOT_RE.match(TAG_RE.sub("", message.content).strip()):
+                    print('User %s (ID: %s, Guild: %s) asked for a google answer %s' % (message.author.name, message.author.id, message.guild, message.content))
+                    msg = await get_google_answer(message)
+                    print(msg)
+                    await message.channel.send("%s, %s" % (message.author.mention, msg.format(message)))
                     return
                 if BAD_BOT_RE_MENTION.search(message.content):
                     print('User %s (ID: %s, Guild: %s) made a bad bot comment :( %s' % (message.author.name, message.author.id, message.guild, message.content))
@@ -215,7 +225,7 @@ async def on_message(message):
     except:
         # Catch anything
         print(traceback.format_exc())
-        await message.channel.send(msg.format("Something went wrong! Please try again."))
+        await message.channel.send("Something went wrong! Please try again.".format(message))
 
 @CLIENT.event
 async def on_ready():
