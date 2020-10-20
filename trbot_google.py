@@ -40,12 +40,12 @@ async def get_google_answer(message):
             else:
                 try:
                     b = await session.wait_for_element(1, 'div[data-attrid="description"]')
-                except:
+                except Exception as e:
                     if not isinstance(e, ArsenicTimeout):
                         traceback.print_exc()
                     try:
-                        b = await session.wait_for_element(1, 'div[data-attrid|="kc"]:not([data-attrid~="image"])')
-                    except:
+                        b = await session.wait_for_element(1, 'div[data-attrid^="kc"] span:not([class])')
+                    except Exception as e:
                         if not isinstance(e, ArsenicTimeout):
                             traceback.print_exc()
                 if not a and not b:
@@ -61,10 +61,12 @@ async def get_google_answer(message):
             msg = "Sorry, I have no answer for this."
         else:
             soup = BeautifulSoup(source)
-            str_lst = [x.strip() for x in soup.stripped_strings][:-1]
+            str_lst = [x.strip() for x in soup.stripped_strings]
+            if len(str_lst) > 1:
+                str_lst = str_lst[:-1]
             if str_lst[0] in ("Description", "Lyrics", "Videos"):
                 str_lst.pop(0)
-            else:
+            elif len(str_lst) > 1:
                 str_lst[0] = f"**{str_lst[0]}**"
             msg = " ".join(str_lst)
     if not msg:
