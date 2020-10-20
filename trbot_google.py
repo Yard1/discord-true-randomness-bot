@@ -27,7 +27,7 @@ async def get_google_answer(message):
             a = None
             b = None
             try:
-                kp = await session.wait_for_element(5, 'div[class|="kp"')
+                kp = await session.wait_for_element(1, 'div[class|="kp"')
                 a = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
             except:
                 traceback.print_exc()
@@ -37,7 +37,7 @@ async def get_google_answer(message):
                 pass
             else:
                 try:
-                    b = await session.wait_for_element(5, 'div[data-attrid="description"]')
+                    b = await session.wait_for_element(1, 'div[data-attrid="description"]')
                 except:
                     traceback.print_exc()
                 if not a and not b:
