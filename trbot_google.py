@@ -19,7 +19,7 @@ async def get_google_answer(message):
     service = services.Chromedriver()
     browser = browsers.Chrome(**{"goog:chromeOptions":CHROME_OPTIONS})
     source = None
-    msg = "Something went wrong."
+    msg = "Sorry, I have no answer for this."
     try:
         async with get_session(service, browser) as session:
             #await session.set_window_size(1920, 1080)
@@ -46,14 +46,14 @@ async def get_google_answer(message):
                     source = await b.get_attribute("outerHTML")
                     msg = ""
     except:
-        msg = "Something went wrong."
+        msg = "Sorry, I have no answer for this."
         traceback.print_exc()
     if not msg:
         if source == "NULL" or not source:
             msg = "Sorry, I have no answer for this."
         else:
             soup = BeautifulSoup(source)
-            msg = "".join([x.strip() for x in soup.stripped_strings][1:-1])
+            msg = " ".join([x.strip() for x in soup.stripped_strings][1:-1])
     if not msg:
         msg = "Sorry, I have no answer for this."
     return msg
