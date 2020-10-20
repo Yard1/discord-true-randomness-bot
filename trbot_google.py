@@ -38,10 +38,11 @@ async def get_google_answer(message):
             expand_list = soup.find("div", {"class": "xpdopen"})
             if expand_list:
                 expand_list.decompose()
-            msg = soup.find("div", id="kp-wp-tab-cont-overview")
+            msg = soup.find("div", id="kp-wp-tab-overview")
             if not msg:
                 msg = soup.find("div", {"role" : "heading", "aria-level" : 3, "data-attrid": True})
             msg = msg.get_text(" ", strip=True)
+            print(msg)
         except:
             traceback.print_exc()
     return msg
