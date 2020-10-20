@@ -16,7 +16,7 @@ if CHROME_BINARY:
 async def get_google_answer(message):
     url_text = TAG_RE.sub("", message.content.replace("`", "")).strip().replace(" ", "+")
     service = services.Chromedriver()
-    browser = browsers.Chrome(chromeOptions=CHROME_OPTIONS)
+    browser = browsers.Chrome(**CHROME_OPTIONS)
     source = None
     try:
         async with get_session(service, browser) as session:
