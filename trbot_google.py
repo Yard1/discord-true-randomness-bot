@@ -29,14 +29,16 @@ async def get_google_answer(message):
             try:
                 kp = await session.wait_for_element(5, 'div[class|="kp"')
                 a = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
-            except ArsenicTimeout:
+            except:
                 traceback.print_exc()
             if a:
                 msg = await a.get_text()
+            if a and msg:
+                pass
             else:
                 try:
                     b = await session.wait_for_element(5, 'div[data-attrid="description"]')
-                except ArsenicTimeout:
+                except:
                     traceback.print_exc()
                 if not a and not b:
                     source = "NULL"
