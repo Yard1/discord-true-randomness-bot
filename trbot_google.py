@@ -54,7 +54,7 @@ async def get_google_answer(message):
         else:
             soup = BeautifulSoup(source)
             str_lst = [x.strip() for x in soup.stripped_strings][:-1]
-            if str_lst[0] == "Description":
+            if str_lst[0] in ("Description", "Lyrics", "Videos"):
                 str_lst.pop(0)
             else:
                 str_lst[0] = f"**{str_lst[0]}**"
