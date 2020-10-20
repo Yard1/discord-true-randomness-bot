@@ -1,6 +1,7 @@
 import asyncio
 import sys
 import os
+import traceback
 
 from arsenic import get_session, keys, browsers, services
 from arsenic.errors import ArsenicTimeout
@@ -28,11 +29,19 @@ async def get_google_answer(message):
                 source = "NULL"
     except:
         pass
-    if not source:
-        msg = "Something went wrong."
-    elif source == "NULL":
+    msg = "Something went wrong."
+    if source == "NULL":
         msg = "Sorry, I have no answer for this."
     else:
-        soup = BeautifulSoup(source)
-        msg = soup.find("div", {"role" : "heading", "aria-level" : 3}).get_text(" ", strip=True)
+        try:
+            soup = BeautifulSoup(source)
+            expand_list = soup.find("div", {"class": "xpdopen"})
+            if expand_list:
+                expand_list.decompose()
+            msg = soup.find("div", id="kp-wp-tab-cont-overview")
+            if not msg:
+                msg = soup.find("div", {"role" : "heading", "aria-level" : 3, "data-attrid": True})
+            msg = msg.get_text(" ", strip=True)
+        except:
+            traceback.print_exc()
     return msg
