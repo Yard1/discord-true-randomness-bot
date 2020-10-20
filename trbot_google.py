@@ -30,8 +30,9 @@ async def get_google_answer(message):
                 kp = await session.wait_for_element(1, 'div[class|="kp"')
                 a = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
                 a = await a.get_element('span')
-            except:
-                traceback.print_exc()
+            except Exception as e:
+                if not isinstance(e, ArsenicTimeout):
+                    traceback.print_exc()
             if a:
                 msg = await a.get_text()
             if a and msg:
@@ -40,7 +41,13 @@ async def get_google_answer(message):
                 try:
                     b = await session.wait_for_element(1, 'div[data-attrid="description"]')
                 except:
-                    traceback.print_exc()
+                    if not isinstance(e, ArsenicTimeout):
+                        traceback.print_exc()
+                    try:
+                        b = await session.wait_for_element(1, 'div[data-attrid|="kc"]:not([data-attrid~="image"])')
+                    except:
+                        if not isinstance(e, ArsenicTimeout):
+                            traceback.print_exc()
                 if not a and not b:
                     source = "NULL"
                 if not source:
