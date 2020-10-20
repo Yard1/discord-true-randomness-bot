@@ -222,7 +222,7 @@ async def on_message(message):
     except:
         # Catch anything
         print(traceback.format_exc())
-        await message.channel.send(msg.format("Something went wrong! Please try again."))
+        await message.channel.send("Something went wrong! Please try again.".format(message))
 
 @CLIENT.event
 async def on_ready():

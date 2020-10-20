@@ -19,30 +19,39 @@ async def get_google_answer(message):
     service = services.Chromedriver()
     browser = browsers.Chrome(**{"goog:chromeOptions":CHROME_OPTIONS})
     source = None
+    msg = "Something went wrong."
     try:
         async with get_session(service, browser) as session:
+            #await session.set_window_size(1920, 1080)
             await session.get(f'https://www.google.com/search?hl=en&q={url_text}')
+            a = None
+            b = None
             try:
-                await session.wait_for_element(2, 'div[aria-level="3"][role="heading"]')
-                source = await session.get_page_source()
+                kp = await session.wait_for_element(5, 'div[class|="kp"')
+                a = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
             except ArsenicTimeout:
-                source = "NULL"
+                traceback.print_exc()
+            if a:
+                msg = await a.get_text()
+            else:
+                try:
+                    b = await session.wait_for_element(5, 'div[data-attrid="description"]')
+                except ArsenicTimeout:
+                    traceback.print_exc()
+                if not a and not b:
+                    source = "NULL"
+                if not source:
+                    source = await b.get_attribute("outerHTML")
+                    msg = ""
     except:
-        pass
-    msg = "Something went wrong."
-    if source == "NULL":
-        msg = "Sorry, I have no answer for this."
-    else:
-        try:
+        msg = "Something went wrong."
+        traceback.print_exc()
+    if not msg:
+        if source == "NULL" or not source:
+            msg = "Sorry, I have no answer for this."
+        else:
             soup = BeautifulSoup(source)
-            expand_list = soup.find("div", {"class": "xpdopen"})
-            if expand_list:
-                expand_list.decompose()
-            msg = soup.find("div", id="kp-wp-tab-overview")
-            if not msg:
-                msg = soup.find("div", {"role" : "heading", "aria-level" : 3, "data-attrid": True})
-            msg = msg.get_text(" ", strip=True)
-            print(msg)
-        except:
-            traceback.print_exc()
+            msg = "".join([x.strip() for x in soup.stripped_strings][1:-1])
+    if not msg:
+        msg = "Sorry, I have no answer for this."
     return msg
