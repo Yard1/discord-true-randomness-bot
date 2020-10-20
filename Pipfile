@@ -18,6 +18,8 @@ discord = "*"
 aiohttp = "*"
 aiodns = "*"
 xmltodict = "*"
+arsenic = "*"
+bs4 = "*"
 
 [dev-packages]
 pylint = "*"

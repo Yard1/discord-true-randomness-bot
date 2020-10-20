@@ -9,6 +9,7 @@ import discord
 import shlex
 import sys
 from trbot import *
+from trbot_google import get_google_answer
 
 QUOTE_LOCK = asyncio.Lock()
 
@@ -128,6 +129,12 @@ async def on_message(message):
                 if EXPLAIN_BOT_RE.search(message.content):
                     print('User %s (ID: %s, Guild: %s) asked to explain %s' % (message.author.name, message.author.id, message.guild, message.content))
                     await message.channel.send("%s, %s" % (message.author.mention, random.choice(EXPLAIN).format(message)))
+                    return
+                if ASK_BOT_RE.match(TAG_RE.sub("", message.content).strip()):
+                    print('User %s (ID: %s, Guild: %s) asked for a google answer %s' % (message.author.name, message.author.id, message.guild, message.content))
+                    msg = await get_google_answer(message)
+                    print(msg)
+                    await message.channel.send("%s, %s" % (message.author.mention, msg.format(message)))
                     return
                 if BAD_BOT_RE_MENTION.search(message.content):
                     print('User %s (ID: %s, Guild: %s) made a bad bot comment :( %s' % (message.author.name, message.author.id, message.guild, message.content))
