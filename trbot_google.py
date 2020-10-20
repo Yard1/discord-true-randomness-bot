@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 from trbot import TAG_RE
 
 CHROME_BINARY = os.getenv("GOOGLE_CHROME_SHIM")
-CHROME_OPTIONS = {'args': ['--headless', '--disable-gpu']}
+CHROME_OPTIONS = {}
 if CHROME_BINARY:
     CHROME_OPTIONS["binary"] = CHROME_BINARY
 
