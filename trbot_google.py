@@ -29,6 +29,7 @@ async def get_google_answer(message):
             try:
                 kp = await session.wait_for_element(1, 'div[class|="kp"')
                 a = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
+                a = await a.get_element('span')
             except:
                 traceback.print_exc()
             if a:
