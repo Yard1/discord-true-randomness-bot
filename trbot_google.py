@@ -15,7 +15,7 @@ if CHROME_BINARY:
     CHROME_OPTIONS["binary"] = CHROME_BINARY
 
 async def get_google_answer(message):
-    url_text = TAG_RE.sub("", message.content.replace("`", "")).strip().replace(" ", "+")
+    url_text = TAG_RE.sub("", message.content.replace("`", "").replace("!answer", "")).strip().replace(" ", "+")
     service = services.Chromedriver()
     browser = browsers.Chrome(**{"goog:chromeOptions":CHROME_OPTIONS})
     source = None
