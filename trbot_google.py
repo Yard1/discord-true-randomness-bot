@@ -53,7 +53,10 @@ async def get_google_answer(message):
             msg = "Sorry, I have no answer for this."
         else:
             soup = BeautifulSoup(source)
-            msg = " ".join([x.strip() for x in soup.stripped_strings][1:-1])
+            str_lst = [x.strip() for x in soup.stripped_strings][:-1]
+            if str_lst[0] == "Description":
+                str_lst.pop(0)
+            msg = " ".join(str_lst)
     if not msg:
         msg = "Sorry, I have no answer for this."
     return msg
