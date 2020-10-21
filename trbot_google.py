@@ -47,15 +47,15 @@ async def get_google_answer(message):
                 pass
             else:
                 try:
-                    b = await session.wait_for_element(
-                        1, 'div[data-attrid="description"]'
+                    b = await session.get_element(
+                        'div[data-attrid="description"]'
                     )
                 except Exception as e:
                     if not isinstance(e, ArsenicTimeout):
                         traceback.print_exc()
                     try:
-                        b = await session.wait_for_element(
-                            1, 'div[data-attrid^="kc"]:not([data-attrid*="image"]) span:not([class])'
+                        b = await session.get_element(
+                            'div[data-attrid^="kc"]:not([data-attrid*="image"]) span:not([class])'
                         )
                     except Exception as e:
                         if not isinstance(e, ArsenicTimeout):
