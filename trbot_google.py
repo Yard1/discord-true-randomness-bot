@@ -79,11 +79,12 @@ async def get_google_answer(message):
                 if "wikipedia" in x["href"]
             ]
             str_lst = [x.strip() for x in soup.stripped_strings]
-            if len(str_lst) > 1:
-                str_lst = str_lst[:-1]
-            if str_lst[0] in ("Lyrics", "Videos"):
+            print(str_lst)
+            if str_lst[-1] == "More":
                 str_lst = []
             else:
+                if len(str_lst) > 1:
+                    str_lst = str_lst[:-1]
                 if str_lst[0] == "Description":
                     str_lst.pop(0)
                 elif len(str_lst) > 1:
