@@ -81,12 +81,15 @@ async def get_google_answer(message):
             str_lst = [x.strip() for x in soup.stripped_strings]
             if len(str_lst) > 1:
                 str_lst = str_lst[:-1]
-            if str_lst[0] in ("Description", "Lyrics", "Videos"):
-                str_lst.pop(0)
-            elif len(str_lst) > 1:
-                str_lst[0] = f"**{str_lst[0]}**"
-            if links:
-                str_lst.append(links[0])
+            if str_lst[0] in ("Lyrics", "Videos"):
+                str_lst = []
+            else:
+                if str_lst[0] == "Description":
+                    str_lst.pop(0)
+                elif len(str_lst) > 1:
+                    str_lst[0] = f"**{str_lst[0]}**"
+                if links:
+                    str_lst.append(links[0])
             msg = " ".join(str_lst)
     if not msg:
         msg = DEFAULT_MSG
