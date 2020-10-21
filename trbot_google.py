@@ -4,7 +4,7 @@ import os
 import traceback
 
 from arsenic import get_session, keys, browsers, services
-from arsenic.errors import ArsenicTimeout
+from arsenic.errors import ArsenicTimeout, NoSuchElement
 
 from bs4 import BeautifulSoup
 from trbot import TAG_RE
@@ -17,57 +17,79 @@ if CHROME_BINARY:
 DEFAULT_MSG = "Sorry, I have no answer for this."
 
 
-async def get_google_answer(message):
-    url_text = (
-        TAG_RE.sub("", message.content.replace("`", "").replace("!answer", ""))
-        .strip()
-        .replace(" ", "+")
+def try_arsenic(f):
+    async def wrapper(*args, **kwargs):
+        try:
+            return await f(*args, **kwargs)
+        except Exception as e:
+            if not isinstance(e, ArsenicTimeout):
+                traceback.print_exc()
+            return None
+
+    return wrapper
+
+
+@try_arsenic
+async def get_kp_box(session):
+    kp = await session.wait_for_element(1, 'div[class|="kp"]')
+    kp_box = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
+    try:
+        kp_box = await kp_box.get_element("span")
+    except NoSuchElement:
+        pass
+    return kp_box
+
+
+@try_arsenic
+async def get_kc_box_basic(session):
+    kc_box = await session.get_element('div[data-attrid="description"]')
+    return kc_box
+
+
+@try_arsenic
+async def get_kc_box_expanded(session):
+    kc_box = await session.get_element(
+        'div[data-attrid^="kc"]:not([data-attrid*="image"]) span:not([class])'
     )
-    service = services.Chromedriver()
-    browser = browsers.Chrome(**{"goog:chromeOptions": CHROME_OPTIONS})
+    return kc_box
+
+
+async def get_kc_box(session):
+    kc_box = await get_kc_box_basic(session)
+    if not kc_box:
+        kc_box = await get_kc_box_expanded(session)
+    return kc_box
+
+
+async def get_google_answer_element(url_text):
     source = None
     msg = DEFAULT_MSG
+    service = services.Chromedriver()
+    browser = browsers.Chrome(**{"goog:chromeOptions": CHROME_OPTIONS})
     try:
         async with get_session(service, browser) as session:
             await session.get(f"https://www.google.com/search?hl=en&q={url_text}")
-            a = None
-            b = None
-            try:
-                kp = await session.wait_for_element(1, 'div[class|="kp"]')
-                a = await kp.get_element(
-                    'div[aria-level="3"][role="heading"][data-attrid]'
-                )
-                a = await a.get_element("span")
-            except Exception as e:
-                if not isinstance(e, ArsenicTimeout):
-                    traceback.print_exc()
-            if a:
-                msg = await a.get_text()
-            if a and msg:
-                pass
-            else:
-                try:
-                    b = await session.get_element(
-                        'div[data-attrid="description"]'
-                    )
-                except Exception as e:
-                    if not isinstance(e, ArsenicTimeout):
-                        traceback.print_exc()
-                    try:
-                        b = await session.get_element(
-                            'div[data-attrid^="kc"]:not([data-attrid*="image"]) span:not([class])'
-                        )
-                    except Exception as e:
-                        if not isinstance(e, ArsenicTimeout):
-                            traceback.print_exc()
-                if not a and not b:
+            kp_box = await get_kp_box(session)
+            if kp_box:
+                msg = await kp_box.get_text()
+            if not (kp_box and msg):
+                kc_box = await get_kc_box(session)
+                if not kc_box:
                     source = "NULL"
-                if not source:
-                    source = await b.get_attribute("outerHTML")
+                elif not source:
+                    source = await kc_box.get_attribute("outerHTML")
                     msg = ""
     except:
         msg = DEFAULT_MSG
         traceback.print_exc()
+    return (msg, source)
+
+
+async def get_google_answer(message):
+    clean_message = message.content.replace("`", "").replace("!answer", "")
+    url_text = TAG_RE.sub("", clean_message).strip().replace(" ", "+")
+    msg, source = await get_google_answer_element(url_text)
+
     if not msg:
         if source == "NULL" or not source:
             msg = DEFAULT_MSG
@@ -79,14 +101,17 @@ async def get_google_answer(message):
                 if "wikipedia" in x["href"]
             ]
             str_lst = [x.strip() for x in soup.stripped_strings]
-            if len(str_lst) > 1:
-                str_lst = str_lst[:-1]
-            if str_lst[0] in ("Description", "Lyrics", "Videos"):
-                str_lst.pop(0)
-            elif len(str_lst) > 1:
-                str_lst[0] = f"**{str_lst[0]}**"
-            if links:
-                str_lst.append(links[0])
+            if str_lst[-1] == "More":
+                str_lst = []
+            else:
+                if len(str_lst) > 1:
+                    str_lst = str_lst[:-1]
+                if str_lst[0] == "Description":
+                    str_lst.pop(0)
+                elif len(str_lst) > 1:
+                    str_lst[0] = f"**{str_lst[0]}**"
+                if links:
+                    str_lst.append(links[0])
             msg = " ".join(str_lst)
     if not msg:
         msg = DEFAULT_MSG
