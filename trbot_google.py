@@ -31,7 +31,7 @@ def try_arsenic(f):
 
 @try_arsenic
 async def get_kp_box(session):
-    kp = await session.wait_for_element(3, 'div[class|="kp"]')
+    kp = await session.wait_for_element(1, 'div[class|="kp"]')
     kp_box = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
     try:
         kp_box = await kp_box.get_element("span")
