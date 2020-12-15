@@ -34,6 +34,7 @@ def try_arsenic(f):
 @try_arsenic
 async def get_kp_box(session):
     kp = await session.wait_for_element(1, 'div[class|="kp"]')
+    print(await kp.get_attribute("outerHTML"))
     kp_box = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
     try:
         kp_box = await kp_box.get_element("span")
@@ -44,10 +45,10 @@ async def get_kp_box(session):
 
 @try_arsenic
 async def get_kc_box_basic(session):
-    kc_box = await session.wait_for_element(5, 'div[data-attrid="description"]')
     print("PAGE SOURCE START")
     print(await session.get_page_source())
     print("PAGE SOURCE END")
+    kc_box = await session.wait_for_element(5, 'div[data-attrid="description"]')
     return kc_box
 
 
