@@ -45,7 +45,9 @@ async def get_kp_box(session):
 @try_arsenic
 async def get_kc_box_basic(session):
     kc_box = await session.wait_for_element(5, 'div[data-attrid="description"]')
-    print(session.get_page_source())
+    print("PAGE SOURCE START")
+    print(await session.get_page_source())
+    print("PAGE SOURCE END")
     return kc_box
 
 
