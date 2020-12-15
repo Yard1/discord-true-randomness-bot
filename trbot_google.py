@@ -46,7 +46,6 @@ async def get_kp_box(session):
             kp_box = await kp_box.get_element("span")
         except NoSuchElement:
             pass
-    asyncio.sleep(100)
     return kp_box
 
 
