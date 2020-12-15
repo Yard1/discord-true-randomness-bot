@@ -13,8 +13,15 @@ CHROME_BINARY = os.getenv("GOOGLE_CHROME_SHIM")
 CHROME_OPTIONS = {}
 if CHROME_BINARY:
     CHROME_OPTIONS["binary"] = CHROME_BINARY
-    CHROME_OPTIONS["excludeSwitches"] = ['enable-automation']
-    CHROME_OPTIONS["args"] = ["user-agent=\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36\""]
+CHROME_OPTIONS["excludeSwitches"] = ["enable-automation"]
+CHROME_OPTIONS["args"] = [
+    'user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36"',
+    "headless",
+    "disable-gpu",
+    "window-size=1920,1080",
+    "no-sandbox",
+    "remote-debugging-port=9222",
+]
 
 DEFAULT_MSG = "Sorry, I have no answer for this."
 
@@ -46,6 +53,11 @@ async def get_kp_box(session):
 
 @try_arsenic
 async def get_kc_box_basic(session):
+    await asyncio.sleep(5)
+    print("PAGE SOURCE START")
+    page = await session.get_element('html')
+    print(await page.get_attribute("innerHTML"))
+    print("PAGE SOURCE END")
     kc_box = await session.get_element('div[data-attrid="description"]')
     return kc_box
 
