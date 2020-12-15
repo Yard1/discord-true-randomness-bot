@@ -23,7 +23,9 @@ def try_arsenic(f):
             return await f(*args, **kwargs)
         except Exception as e:
             if not isinstance(e, ArsenicTimeout):
+                print("CAUGHT EXCEPTION")
                 traceback.print_exc()
+                print("")
             return None
 
     return wrapper
@@ -101,6 +103,7 @@ async def get_google_answer(message):
             msg = DEFAULT_MSG
         else:
             soup = BeautifulSoup(source)
+            print(soup)
             links = [
                 x["href"]
                 for x in soup.find_all("a", attrs={"href": True})
