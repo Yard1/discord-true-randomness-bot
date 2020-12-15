@@ -14,7 +14,7 @@ CHROME_OPTIONS = {}
 if CHROME_BINARY:
     CHROME_OPTIONS["binary"] = CHROME_BINARY
     CHROME_OPTIONS["excludeSwitches"] = ['enable-automation']
-    CHROME_OPTIONS["args"] = {"user-agent":"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36"}
+    CHROME_OPTIONS["args"] = ["user-agent=\"Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36\""]
 
 DEFAULT_MSG = "Sorry, I have no answer for this."
 
