@@ -85,6 +85,12 @@ async def get_google_answer_element(url_text):
     return (msg, source)
 
 
+async def escape_markdown(str):
+    if not str:
+        return str
+    return str.replace("`", "\\`").replace("*", "\\*").replace("_", "\\_")
+
+
 async def get_google_answer(message):
     clean_message = message.content.replace("`", "").replace("!answer", "")
     url_text = TAG_RE.sub("", clean_message).strip().replace(" ", "+")
@@ -115,4 +121,6 @@ async def get_google_answer(message):
             msg = " ".join(str_lst)
     if not msg:
         msg = DEFAULT_MSG
+    else:
+        msg = await escape_markdown(msg)
     return msg
