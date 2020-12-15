@@ -31,25 +31,35 @@ def try_arsenic(f):
 
 @try_arsenic
 async def get_kp_box(session):
-    kp = await session.wait_for_element(1, 'div[class|="kp"]')
-    kp_box = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
+    kp = await session.wait_for_element(2, 'div[class|="kp"]')
     try:
+        kp_box = await kp.get_element(
+            'div[aria-level="3"][role="heading"][data-attrid]'
+        )
         kp_box = await kp_box.get_element("span")
-    except NoSuchElement:
-        pass
+    except:
+        kp = await session.get_elements('div[class|="kp"]')[0]
+        kp_box = await kp.get_element(
+            'div[aria-level="3"][role="heading"][data-attrid]'
+        )
+        try:
+            kp_box = await kp_box.get_element("span")
+        except NoSuchElement:
+            pass
+    asyncio.sleep(100)
     return kp_box
 
 
 @try_arsenic
 async def get_kc_box_basic(session):
-    kc_box = await session.get_element('div[data-attrid="description"]')
+    kc_box = await session.wait_for_element(1, 'div[data-attrid="description"]')
     return kc_box
 
 
 @try_arsenic
 async def get_kc_box_expanded(session):
-    kc_box = await session.get_element(
-        'div[data-attrid^="kc"]:not([data-attrid*="image"]) span:not([class])'
+    kc_box = await session.wait_for_element(
+        1, 'div[data-attrid^="kc"]:not([data-attrid*="image"]) span:not([class])'
     )
     return kc_box
 
