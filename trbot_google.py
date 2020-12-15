@@ -44,7 +44,7 @@ async def get_kp_box(session):
             kp_box = kp_box_lst[1]
         except NoSuchElement:
             kp_box = kp_box_lst[0]
-    except NoSuchElement:
+    except:
         pass
     return kp_box
 
