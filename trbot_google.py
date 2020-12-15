@@ -14,7 +14,7 @@ CHROME_OPTIONS = {}
 if CHROME_BINARY:
     CHROME_OPTIONS["binary"] = CHROME_BINARY
     CHROME_OPTIONS["excludeSwitches"] = ['enable-automation']
-    CHROME_OPTIONS["user-agent"] = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36"
+    CHROME_OPTIONS["User-Agent"] = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36"
 
 DEFAULT_MSG = "Sorry, I have no answer for this."
 
@@ -112,18 +112,21 @@ async def get_google_answer(message):
                 if "wikipedia" in x["href"]
             ]
             str_lst = [x.strip() for x in soup.stripped_strings]
-            if str_lst[-1] == "More":
-                str_lst = []
-            else:
-                if len(str_lst) > 1:
-                    str_lst = str_lst[:-1]
-                if str_lst[0] == "Description":
-                    str_lst.pop(0)
-                elif len(str_lst) > 1:
-                    str_lst[0] = f"**{str_lst[0]}**"
-                if links:
-                    str_lst.append(links[0])
-            msg = " ".join(str_lst)
+            try:
+                if str_lst[-1] == "More":
+                    str_lst = []
+                else:
+                    if len(str_lst) > 1:
+                        str_lst = str_lst[:-1]
+                    if str_lst[0] == "Description":
+                        str_lst.pop(0)
+                    elif len(str_lst) > 1:
+                        str_lst[0] = f"**{str_lst[0]}**"
+                    if links:
+                        str_lst.append(links[0])
+                msg = " ".join(str_lst)
+            except:
+                msg = None
     if not msg:
         msg = DEFAULT_MSG
     else:
