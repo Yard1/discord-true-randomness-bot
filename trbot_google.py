@@ -13,6 +13,8 @@ CHROME_BINARY = os.getenv("GOOGLE_CHROME_SHIM")
 CHROME_OPTIONS = {}
 if CHROME_BINARY:
     CHROME_OPTIONS["binary"] = CHROME_BINARY
+    CHROME_OPTIONS["excludeSwitches"] = ['enable-automation']
+    CHROME_OPTIONS["user-agent"] = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36"
 
 DEFAULT_MSG = "Sorry, I have no answer for this."
 
@@ -34,7 +36,6 @@ def try_arsenic(f):
 @try_arsenic
 async def get_kp_box(session):
     kp = await session.wait_for_element(1, 'div[class|="kp"]')
-    print(await kp.get_attribute("outerHTML"))
     kp_box = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
     try:
         kp_box = await kp_box.get_element("span")
@@ -45,17 +46,14 @@ async def get_kp_box(session):
 
 @try_arsenic
 async def get_kc_box_basic(session):
-    print("PAGE SOURCE START")
-    print(await session.get_page_source())
-    print("PAGE SOURCE END")
-    kc_box = await session.wait_for_element(5, 'div[data-attrid="description"]')
+    kc_box = await session.get_element('div[data-attrid="description"]')
     return kc_box
 
 
 @try_arsenic
 async def get_kc_box_expanded(session):
-    kc_box = await session.wait_for_element(
-        1, 'div[data-attrid^="kc"]:not([data-attrid*="image"]) span:not([class])'
+    kc_box = await session.get_element(
+        'div[data-attrid^="kc"]:not([data-attrid*="image"]) span:not([class])'
     )
     return kc_box
 
