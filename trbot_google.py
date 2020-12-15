@@ -13,15 +13,6 @@ CHROME_BINARY = os.getenv("GOOGLE_CHROME_SHIM")
 CHROME_OPTIONS = {}
 if CHROME_BINARY:
     CHROME_OPTIONS["binary"] = CHROME_BINARY
-CHROME_OPTIONS["excludeSwitches"] = ["enable-automation"]
-CHROME_OPTIONS["args"] = [
-    'user-agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/87.0.4280.66 Safari/537.36"',
-    "headless",
-    "disable-gpu",
-    "window-size=1920,1080",
-    "no-sandbox",
-    "remote-debugging-port=9222",
-]
 
 DEFAULT_MSG = "Sorry, I have no answer for this."
 
@@ -45,7 +36,14 @@ async def get_kp_box(session):
     kp = await session.wait_for_element(1, 'div[class|="kp"]')
     kp_box = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
     try:
-        kp_box = await kp_box.get_element("span")
+        kp_box_lst = await kp_box.get_elements(":scope > span")
+        if len(kp_box_lst) < 2:
+            kp_box = kp_box_lst[0]
+        try:
+            await kp_box_lst[0].get_element("svg")
+            kp_box = kp_box_lst[1]
+        except NoSuchElement:
+            kp_box = kp_box_lst[0]
     except NoSuchElement:
         pass
     return kp_box
@@ -53,11 +51,6 @@ async def get_kp_box(session):
 
 @try_arsenic
 async def get_kc_box_basic(session):
-    await asyncio.sleep(5)
-    print("PAGE SOURCE START")
-    page = await session.get_element('html')
-    print(await page.get_attribute("innerHTML"))
-    print("PAGE SOURCE END")
     kc_box = await session.get_element('div[data-attrid="description"]')
     return kc_box
 
@@ -84,7 +77,7 @@ async def get_google_answer_element(url_text):
     browser = browsers.Chrome(**{"goog:chromeOptions": CHROME_OPTIONS})
     try:
         async with get_session(service, browser) as session:
-            await session.get(f"https://www.google.com/search?hl=en&q={url_text}")
+            await session.get(f"https://www.google.com/search?hl=en&gl=UK&q={url_text}")
             kp_box = await get_kp_box(session)
             if kp_box:
                 msg = await kp_box.get_text()
