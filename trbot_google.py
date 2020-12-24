@@ -116,7 +116,7 @@ async def get_google_answer(message):
                 for x in soup.find_all("a", attrs={"href": True})
                 if "wikipedia" in x["href"]
             ]
-            str_lst = [x.strip() for x in soup.stripped_strings]
+            str_lst = [await escape_markdown(x.strip()) for x in soup.stripped_strings]
             try:
                 if str_lst[-1] == "More":
                     str_lst = []
@@ -134,6 +134,4 @@ async def get_google_answer(message):
                 msg = None
     if not msg:
         msg = DEFAULT_MSG
-    else:
-        msg = await escape_markdown(msg)
     return msg
