@@ -104,6 +104,7 @@ async def get_google_answer(message):
     clean_message = message.content.replace("`", "").replace("!answer", "")
     url_text = TAG_RE.sub("", clean_message).strip().replace(" ", "+")
     msg, source = await get_google_answer_element(url_text)
+    msg = await escape_markdown(msg)
 
     if not msg:
         if source == "NULL" or not source:
