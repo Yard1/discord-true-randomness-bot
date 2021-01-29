@@ -31,9 +31,40 @@ def try_arsenic(f):
     return wrapper
 
 
+async def format_kc_box_text(kc_box):
+    source = await kc_box.get_attribute("outerHTML")
+    if source == "NULL" or not source:
+        msg = None
+    else:
+        soup = BeautifulSoup(source)
+        print(soup)
+        links = [
+            x["href"]
+            for x in soup.find_all("a", attrs={"href": True})
+            if "wikipedia" in x["href"]
+        ]
+        str_lst = [await escape_markdown(x.strip()) for x in soup.stripped_strings]
+        try:
+            if str_lst[-1] == "More":
+                str_lst = []
+            else:
+                if len(str_lst) > 1:
+                    str_lst = str_lst[:-1]
+                if str_lst[0] == "Description":
+                    str_lst.pop(0)
+                elif len(str_lst) > 1:
+                    str_lst[0] = f"**{str_lst[0]}**"
+                if links:
+                    str_lst.append(links[0])
+            msg = " ".join(str_lst)
+        except:
+            msg = None
+    return msg
+
+
 @try_arsenic
-async def get_kp_box(session):
-    kp = await session.wait_for_element(1, 'div[class|="kp"]')
+async def get_kp_box_text(session):
+    kp = await session.get_element('div[class|="kp"]')
     kp_box = await kp.get_element('div[aria-level="3"][role="heading"][data-attrid]')
     try:
         kp_box_lst = await kp_box.get_elements(":scope > span")
@@ -46,7 +77,11 @@ async def get_kp_box(session):
             kp_box = kp_box_lst[0]
     except:
         pass
-    return kp_box
+
+    try:
+        return await kp_box.get_text()
+    except:
+        return None
 
 
 @try_arsenic
@@ -58,40 +93,67 @@ async def get_kc_box_basic(session):
 @try_arsenic
 async def get_kc_box_expanded(session):
     kc_box = await session.get_element(
-        'div[data-attrid^="kc"]:not([data-attrid*="image"]) span:not([class])'
+        'div[data-attrid^="kc"]:not([data-attrid*="image"]):not([data-attrid*="music"]) span:not([class])'
     )
     return kc_box
 
 
-async def get_kc_box(session):
-    kc_box = await get_kc_box_basic(session)
-    if not kc_box:
-        kc_box = await get_kc_box_expanded(session)
+@try_arsenic
+async def get_stock_market(session):
+    kc_box = await session.get_element("g-card-section")
     return kc_box
 
 
-async def get_google_answer_element(url_text):
-    source = None
-    msg = DEFAULT_MSG
+@try_arsenic
+async def get_currency(session):
+    kc_box = await session.get_element("div[data-exchange-rate]")
+    return kc_box
+
+
+async def get_kc_box_text(session):
+    kc_box = await get_kc_box_basic(session)
+    if not kc_box:
+        kc_box = await get_kc_box_expanded(session)
+
+    return await format_kc_box_text(kc_box)
+
+
+async def get_financial_box_text(session):
+    msg = None
+    kc_box = await get_stock_market(session)
+    if kc_box:
+        msg = await kc_box.get_text()
+        msg = await escape_markdown(msg)
+        try:
+            msg = msg.replace(" · Disclaimer", "").replace(">", "for").split("\n")
+            msg = f"{msg[0]} ({msg[5]})\n**{msg[1]}** ({msg[2]})\n{msg[3]}\n{msg[4]}"
+        except:
+            msg = None
+    else:
+        kc_box = await get_currency(session)
+        if kc_box:
+            msg = await kc_box.get_text()
+            msg = await escape_markdown(msg)
+            msg = msg.replace("\n", " ")
+    return msg
+
+
+async def get_google_answer_text(url_text):
+    msg = None
     service = services.Chromedriver()
     browser = browsers.Chrome(**{"goog:chromeOptions": CHROME_OPTIONS})
     try:
         async with get_session(service, browser) as session:
             await session.get(f"https://www.google.com/search?hl=en&gl=UK&q={url_text}")
-            kp_box = await get_kp_box(session)
-            if kp_box:
-                msg = await kp_box.get_text()
-            if not (kp_box and msg):
-                kc_box = await get_kc_box(session)
-                if not kc_box:
-                    source = "NULL"
-                elif not source:
-                    source = await kc_box.get_attribute("outerHTML")
-                    msg = ""
+            msg = await get_financial_box_text(session)
+            if not msg:
+                msg = await get_kp_box_text(session)
+            if not msg:
+                msg = await get_kc_box_text(session)
     except:
-        msg = DEFAULT_MSG
+        msg = None
         traceback.print_exc()
-    return (msg, source)
+    return msg
 
 
 async def escape_markdown(str):
@@ -103,36 +165,7 @@ async def escape_markdown(str):
 async def get_google_answer(message):
     clean_message = message.content.replace("`", "").replace("!answer", "")
     url_text = TAG_RE.sub("", clean_message).strip().replace(" ", "+")
-    msg, source = await get_google_answer_element(url_text)
-    msg = await escape_markdown(msg)
-
-    if not msg:
-        if source == "NULL" or not source:
-            msg = DEFAULT_MSG
-        else:
-            soup = BeautifulSoup(source)
-            print(soup)
-            links = [
-                x["href"]
-                for x in soup.find_all("a", attrs={"href": True})
-                if "wikipedia" in x["href"]
-            ]
-            str_lst = [await escape_markdown(x.strip()) for x in soup.stripped_strings]
-            try:
-                if str_lst[-1] == "More":
-                    str_lst = []
-                else:
-                    if len(str_lst) > 1:
-                        str_lst = str_lst[:-1]
-                    if str_lst[0] == "Description":
-                        str_lst.pop(0)
-                    elif len(str_lst) > 1:
-                        str_lst[0] = f"**{str_lst[0]}**"
-                    if links:
-                        str_lst.append(links[0])
-                msg = " ".join(str_lst)
-            except:
-                msg = None
+    msg = await get_google_answer_text(url_text)
     if not msg:
         msg = DEFAULT_MSG
     return msg
