@@ -125,8 +125,7 @@ async def get_financial_box_text(session):
         msg = await kc_box.get_text()
         msg = await escape_markdown(msg)
         try:
-            msg = msg.replace(" · Disclaimer", "").replace(">", "for").split("\n")
-            msg = f"{msg[0]} ({msg[5]})\n**{msg[1]}** ({msg[2]})\n{msg[3]}\n{msg[4]}"
+            msg = msg.replace(" · Disclaimer", "").replace(">", "for")
         except:
             msg = None
     else:
