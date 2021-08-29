@@ -8,6 +8,7 @@ from arsenic.errors import ArsenicTimeout, NoSuchElement
 
 from bs4 import BeautifulSoup
 from trbot import TAG_RE
+import time
 
 CHROME_BINARY = os.getenv("GOOGLE_CHROME_SHIM")
 CHROME_OPTIONS = {}
@@ -32,7 +33,7 @@ def try_arsenic(f):
 
 
 async def format_kc_box_text(kc_box):
-    source = await kc_box.get_attribute("outerHTML")
+    source = await kc_box.get_property("outerHTML")
     if source == "NULL" or not source:
         msg = None
     else:

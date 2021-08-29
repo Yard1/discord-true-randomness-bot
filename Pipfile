@@ -18,8 +18,10 @@ discord = "*"
 aiohttp = "*"
 aiodns = "*"
 xmltodict = "*"
-arsenic = "*"
+arsenic = ">=21.8"
 bs4 = "*"
+discord-py-interactions = "*"
+
 
 [dev-packages]
 pylint = "*"
